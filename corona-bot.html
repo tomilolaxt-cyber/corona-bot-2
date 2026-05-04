@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corona Bot - AI Assistant for Corona Schools</title>
+    <title>Corona School Bot - AI Assistant for Corona Schools</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -28,8 +28,8 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #ff1b02 0%, #a80000 100%);
-            color: rgb(255, 0, 0);
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+            color: white;
             padding: 20px;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -96,13 +96,13 @@
         }
 
         .user-message .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
             color: white;
             border-radius: 12px 12px 0 12px;
             padding: 12px 16px;
             max-width: 70%;
             word-wrap: break-word;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
         }
 
         .bot-message .message-content {
@@ -152,12 +152,12 @@
 
         .chat-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #dc143c;
         }
 
         .send-btn {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -169,7 +169,7 @@
 
         .send-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
         }
 
         .send-btn:active {
@@ -193,7 +193,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #667eea;
+            background: #dc143c;
             margin: 0 4px;
             animation: bounce 1.4s infinite;
         }
@@ -237,7 +237,7 @@
 
         .quick-links h3,
         .info-box h3 {
-            color: #667eea;
+            color: #dc143c;
             margin-bottom: 15px;
             font-size: 1.1em;
             font-weight: 600;
@@ -259,9 +259,9 @@
         }
 
         .quick-link-btn:hover {
-            background: #667eea;
+            background: #dc143c;
             color: white;
-            border-color: #667eea;
+            border-color: #dc143c;
             transform: translateX(5px);
         }
 
@@ -280,7 +280,7 @@
         }
 
         .info-box strong {
-            color: #667eea;
+            color: #dc143c;
             font-weight: 600;
         }
 
@@ -315,13 +315,13 @@
 
         .chat-messages::-webkit-scrollbar-thumb,
         .sidebar::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: #dc143c;
             border-radius: 4px;
         }
 
         .chat-messages::-webkit-scrollbar-thumb:hover,
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
+            background: #8b0000;
         }
 
         /* Responsive Design */
@@ -373,7 +373,7 @@
     <div class="container">
         <header class="header">
             <div class="header-content">
-                <h1>🤖 Corona Bot</h1>
+                <h1>🤖 Corona School Bot</h1>
                 <p>AI Assistant for Corona Schools Information</p>
             </div>
         </header>
@@ -383,7 +383,7 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="message bot-message">
                         <div class="message-content">
-                            <p>Hello! I'm Corona Bot, your AI assistant for Corona Schools. Ask me anything about our schools, curriculum, admissions, facilities, or any other information you'd like to know!</p>
+                            <p>Hello! I'm Corona School Bot, your AI assistant for Corona Schools. Ask me anything about our schools, curriculum, admissions, facilities, or any other information you'd like to know!</p>
                         </div>
                     </div>
                 </div>
@@ -434,30 +434,58 @@
     </div>
 
     <script>
-        // Corona Schools Knowledge Base
-        const coronaData = {
-            schoolInfo: {
-                name: "Corona Schools' Trust Council",
-                yearsOfExistence: 70,
-                numberOfSchools: 8,
-                totalStudents: 35000,
+        // Corona Schools Knowledge Base - Updated 2026
+        const coronaKnowledge = {
+            leadership: {
+                trustCouncil: {
+                    chairman: "Mr. Olaniyi Yusuf (Appointed early 2026)",
+                    directorOfEducation: "Mrs. Adetokunbo Matilukuro",
+                    ceo: "Mrs. Adeyoyin Adesina"
+                },
+                schools: {
+                    ikoyiPrimary: {
+                        head: "Mrs. Funlola Olorunishola (Since 2022)",
+                        location: "6 Mekunwen Road, Ikoyi",
+                        houses: ["Crane", "Weaver", "Kingfisher", "Heron"],
+                        curriculum: "Blend of Nigerian National Curriculum and British National Curriculum"
+                    },
+                    lekkiPrimary: {
+                        head: "Mrs. Grace Omo-Egbekuse",
+                        location: "Abijo GRA, Lekki",
+                        focus: "Technology and innovation, robotics competitions (Pi Wars)"
+                    },
+                    lekkiSecondary: {
+                        principal: "Mr. Amoo",
+                        location: "Abijo GRA, Lekki",
+                        type: "Day Secondary School"
+                    },
+                    agbaraSecondary: {
+                        principal: "Mr. Chijioke Anyanwu",
+                        location: "Agbara Estate",
+                        type: "Boarding Secondary School",
+                        accreditation: "NEASC Accredited - only in Africa"
+                    },
+                    gbagada: {
+                        location: "Gbagada, Lagos",
+                        specialty: "Foremost Rugby School in Lagos State, 4-time trophy winner"
+                    }
+                }
+            },
+            generalInfo: {
+                yearsOfExcellence: 70,
+                totalSchools: 8,
+                totalStudents: "35,000+",
                 staffCount: 668,
-                mission: "To provide world-class education to children. We inculcate high moral and ethical values in our students as we prepare them for lifelong learning, service and fulfillment.",
-                vision: "To be Nigeria's leading educational institution focused on and dedicated to producing well-rounded and proudly Nigerian young men and women equipped for continuous learning, personal mastery and leadership.",
-                location: "Nigeria",
-                schools: [
-                    "Corona Secondary School Agbara (NEASC Accredited)",
-                    "Corona School Gbagada (Rugby School)",
-                    "Multiple primary and nursery schools"
-                ]
+                mission: "Provide world-class education with high moral and ethical values",
+                vision: "Be Nigeria's leading educational institution producing well-rounded young men and women"
             },
             curriculum: {
-                nursery: "Montessori method supporting learning in all curriculum areas",
+                nursery: "Montessori method",
                 primary: "Blend of Nigerian and International Primary Curriculum (IPC)",
-                secondary: "Blend of Nigerian and British curricula preparing students for top undergraduate programmes worldwide"
+                secondary: "Blend of Nigerian and British curricula"
             },
             accreditations: [
-                "NEASC Accreditation (only Secondary School in Africa)",
+                "NEASC Accreditation (Corona Secondary School Agbara - only in Africa)",
                 "ACCA Foundation Level (only secondary school in Nigeria)",
                 "British Council Community Initiative Award 2019",
                 "Microsoft Showcase/Incubator Schools",
@@ -468,24 +496,18 @@
                 "Music", "Taekwondo", "Athletics", "Ballet", "Golf", "Cheerleading",
                 "Dance", "Basketball", "Drama", "French", "Chess", "STEAM",
                 "Model United Nations", "Public Speaking", "Debating", "Cooking Club",
-                "Rugby", "German", "Hausa", "Igbo", "Yoruba", "Reading", "Football"
-            ],
-            admissions: {
-                currentYear: "2025/2026",
-                levels: "Year 7-11",
-                types: ["Boarding", "Day School"],
-                programs: ["Regular", "Scholarship"],
-                status: "Ongoing"
-            }
+                "Rugby", "German", "Hausa", "Igbo", "Yoruba", "Reading", "Football",
+                "Robotics (Pi Wars)"
+            ]
         };
 
-        // AI Response Generator with Common Sense
+        // AI Response Generator
         function generateSmartResponse(userMessage) {
             const message = userMessage.toLowerCase().trim();
             
             // Greeting responses
             if (message.match(/^(hi|hello|hey|greetings|good morning|good afternoon|good evening)/i)) {
-                return "Hello! Welcome to Corona Bot. I'm here to help you learn about Corona Schools. What would you like to know?";
+                return "Hello! Welcome to Corona School Bot. I'm here to help you learn about Corona Schools. What would you like to know?";
             }
             
             // How are you
@@ -493,98 +515,71 @@
                 return "I'm doing great, thank you for asking! I'm here and ready to help you with any questions about Corona Schools. What can I tell you?";
             }
             
+            // Leadership questions
+            if (message.match(/chairman|ceo|director|leadership|who leads|who runs|head of school|principal/i)) {
+                return `**Corona Schools Leadership (2026):**\n\n**Trust Council:**\n• Chairman: ${coronaKnowledge.leadership.trustCouncil.chairman}\n• Director of Education: ${coronaKnowledge.leadership.trustCouncil.directorOfEducation}\n• CEO/Trust Council Secretary: ${coronaKnowledge.leadership.trustCouncil.ceo}\n\n**School Heads:**\n• Ikoyi Primary: ${coronaKnowledge.leadership.schools.ikoyiPrimary.head}\n• Lekki Primary: ${coronaKnowledge.leadership.schools.lekkiPrimary.head}\n• Lekki Secondary: Principal ${coronaKnowledge.leadership.schools.lekkiSecondary.principal}\n• Agbara Secondary: Principal ${coronaKnowledge.leadership.schools.agbaraSecondary.principal}`;
+            }
+            
+            // Ikoyi questions
+            if (message.match(/ikoyi/i)) {
+                const school = coronaKnowledge.leadership.schools.ikoyiPrimary;
+                return `**Corona School, Ikoyi:**\n\n• Head of School: ${school.head}\n• Location: ${school.location}\n• Curriculum: ${school.curriculum}\n• Houses: ${school.houses.join(', ')}\n• Known for: "Total Child" approach and strong tradition\n• Type: Flagship primary school`;
+            }
+            
+            // Lekki questions
+            if (message.match(/lekki/i)) {
+                const primary = coronaKnowledge.leadership.schools.lekkiPrimary;
+                const secondary = coronaKnowledge.leadership.schools.lekkiSecondary;
+                return `**Corona Schools, Lekki:**\n\n**Primary School:**\n• Head of School: ${primary.head}\n• Location: ${primary.location}\n• Focus: ${primary.focus}\n\n**Day Secondary School (CDSS):**\n• Principal: ${secondary.principal}\n• Location: ${secondary.location}\n• Type: ${secondary.type}`;
+            }
+            
+            // Agbara questions
+            if (message.match(/agbara/i)) {
+                const school = coronaKnowledge.leadership.schools.agbaraSecondary;
+                return `**Corona Secondary School, Agbara:**\n\n• Principal: ${school.principal}\n• Location: ${school.location}\n• Type: ${school.type}\n• Accreditation: ${school.accreditation}\n• Special: Only secondary school in Africa with NEASC accreditation`;
+            }
+            
+            // Gbagada questions
+            if (message.match(/gbagada/i)) {
+                const school = coronaKnowledge.leadership.schools.gbagada;
+                return `**Corona School, Gbagada:**\n\n• Location: ${school.location}\n• Specialty: ${school.specialty}\n• Known for: Excellence in Rugby sports`;
+            }
+            
             // About Corona Schools
             if (message.match(/about|who are you|what is corona|tell me about|introduce/i)) {
-                return `Corona Schools' Trust Council is a prestigious educational institution in Nigeria with ${coronaData.schoolInfo.yearsOfExistence} years of excellence. We operate ${coronaData.schoolInfo.numberOfSchools} schools representing over ${coronaData.schoolInfo.totalStudents}+ students.\n\nOur Mission: To provide world-class education to children, inculcating high moral and ethical values as we prepare them for lifelong learning, service and fulfillment.\n\nOur Vision: To be Nigeria's leading educational institution focused on producing well-rounded and proudly Nigerian young men and women equipped for continuous learning, personal mastery and leadership.\n\nKey Stats:\n• 70 years of educational excellence\n• 8 schools across Nigeria\n• 35,000+ students (current and past)\n• 668 experienced staff members\n• International recognition and accreditations`;
-            }
-            
-            // Mission and Vision
-            if (message.match(/mission|vision|goal|purpose|what do you aim/i)) {
-                return `Mission: ${coronaData.schoolInfo.mission}\n\nVision: ${coronaData.schoolInfo.vision}`;
-            }
-            
-            // Admissions
-            if (message.match(/admission|enroll|register|apply|entrance|how to join|get in/i)) {
-                return `Corona Schools is currently accepting admissions for ${coronaData.admissions.currentYear} into ${coronaData.admissions.levels} for both ${coronaData.admissions.types.join(' & ')} options. We offer both regular and scholarship programs. Entrance Examination Registration is ongoing. We welcome students from diverse backgrounds!`;
+                const info = coronaKnowledge.generalInfo;
+                return `**About Corona Schools:**\n\nCorona Schools' Trust Council is a prestigious educational institution in Nigeria with ${info.yearsOfExcellence} years of excellence.\n\n**Key Stats:**\n• ${info.totalSchools} schools across Nigeria\n• ${info.totalStudents} students (current and past)\n• ${info.staffCount} experienced staff members\n\n**Mission:** ${info.mission}\n\n**Vision:** ${info.vision}`;
             }
             
             // Curriculum
             if (message.match(/curriculum|subjects|program|course|what do you teach|education|learning/i)) {
-                return `**Our Comprehensive Curriculum:**\n\n**Nursery Schools:**\n• Montessori method supporting learning in all curriculum areas\n• Focus on early childhood development and foundational skills\n\n**Primary Schools:**\n• Blend of Nigerian and International Primary Curriculum (IPC)\n• Carefully aligned with international standards\n• Develops critical thinking and global awareness\n\n**Secondary Schools:**\n• Blend of Nigerian and British curricula\n• Prepares students for entry to top advanced level undergraduate programmes across the world\n• Rigorous academic standards with practical application\n\n**Special Programs:**\n• ACCA Foundation Level (unique in Nigeria)\n• Microsoft technology certification programs\n• STEAM education integration\n• Language programs: French, German, Hausa, Igbo, Yoruba`;
-            }
-            
-            // Facilities
-            if (message.match(/facilities|infrastructure|campus|library|technology|building|sports|lab/i)) {
-                return `Corona Schools boasts world-class facilities including modern libraries, advanced technology infrastructure, sports facilities, and state-of-the-art learning spaces. We are Microsoft Showcase/Incubator Schools with ${coronaData.accreditations[4]} and ${coronaData.accreditations[5]} on staff.`;
+                const curr = coronaKnowledge.curriculum;
+                return `**Corona Schools Curriculum:**\n\n**Nursery:** ${curr.nursery}\n\n**Primary:** ${curr.primary}\n\n**Secondary:** ${curr.secondary}\n\nAll programs focus on developing well-rounded students with strong academic foundations and moral values.`;
             }
             
             // Activities
             if (message.match(/activities|co-curricular|sports|clubs|music|drama|rugby|what can i do|extracurricular/i)) {
-                return `**30+ Co-Curricular Activities:**\n\nWe offer diverse programs to develop well-rounded students:\n\n**Sports:**\n• Rugby (Gbagada is a 4-time trophy winner)\n• Basketball\n• Athletics\n• Taekwondo\n• Golf\n• Football\n\n**Arts & Culture:**\n• Music\n• Drama\n• Ballet\n• Dance\n• Cheerleading\n\n**Academic & Leadership:**\n• Model United Nations\n• Public Speaking & Debating\n• Chess\n• STEAM programs\n• Go Techy (Animation)\n• Young Writer's Workshop\n\n**Languages & Skills:**\n• French\n• German\n• Hausa, Igbo, Yoruba\n• Jolly Phonics/Elocution\n• Reading Club\n\n**Other Clubs:**\n• Cooking Club\n• Brownies\n• ICT Club\n\nThese activities develop leadership, teamwork, creativity, and diverse talents in our students.`;
+                const activities = coronaKnowledge.activities;
+                return `**Co-Curricular Activities:**\n\nWe offer 30+ diverse activities including:\n\n${activities.slice(0, 15).join(', ')}\n\nAnd many more! These activities develop leadership, teamwork, creativity, and diverse talents.`;
             }
             
             // Accreditations
             if (message.match(/accreditation|award|certified|recognition|neasc|acca|british council/i)) {
-                return `**Prestigious Accreditations & Awards:**\n\n**NEASC Accreditation:**\n• Corona Secondary School Agbara is the ONLY Secondary School in Africa accredited by NEASC\n• Represents highest international standards\n• Globally recognized certification\n\n**ACCA Program:**\n• Only secondary school in Nigeria where students pass the foundation level of Association of Chartered Certified Accountants\n• Unique accounting qualification opportunity\n• Prepares students for professional accounting careers\n\n**British Council Award:**\n• Won Community Initiative Award 2019\n• Recognized for student-led water borehole initiative\n• Demonstrates commitment to social responsibility\n\n**Microsoft Recognition:**\n• Microsoft Showcase/Incubator School status\n• 158 Microsoft Innovative Experts\n• 187 Microsoft Certified Experts on staff\n• Leader in technology education\n\nThese accreditations and awards demonstrate Corona Schools' commitment to excellence, innovation, and preparing students for global success.`;
+                return `**Corona Schools Accreditations & Awards:**\n\n• ${coronaKnowledge.accreditations.join('\n• ')}`;
             }
             
-            // Staff
-            if (message.match(/staff|teachers|employees|faculty|how many teachers|expert/i)) {
-                return `Corona Schools employs ${coronaData.schoolInfo.staffCount} experienced academic and non-academic staff dedicated to providing world-class education. Our team includes Microsoft Certified Experts and innovative educators committed to student success.`;
+            // Admissions
+            if (message.match(/admission|enroll|register|apply|entrance|how to join|get in/i)) {
+                return `**Admissions Information:**\n\n• Academic Year: 2025/2026\n• Levels: Year 7-11\n• School Types: Boarding & Day School\n• Programs: Regular & Scholarship\n\nEntrance Examination Registration is ongoing. Contact the admissions office for more details.`;
             }
             
-            // Alumni
-            if (message.match(/alumni|graduates|past students|network|where do graduates go/i)) {
-                return `Corona Schools has a most influential alumni network with over ${coronaData.schoolInfo.totalStudents}+ current and past students. Our alumni excel globally, contributing to various fields and maintaining strong connections with the school community.`;
-            }
-            
-            // Location
-            if (message.match(/location|where|address|school|agbara|gbagada|lagos|which schools/i)) {
-                return `Corona Schools operates ${coronaData.schoolInfo.numberOfSchools} schools across ${coronaData.schoolInfo.location} including:\n\n• ${coronaData.schoolInfo.schools.join('\n• ')}`;
-            }
-            
-            // Number of schools
-            if (message.match(/how many schools|number of schools|schools do you have/i)) {
-                return `Corona Schools operates ${coronaData.schoolInfo.numberOfSchools} schools across Nigeria, representing over ${coronaData.schoolInfo.totalStudents}+ students.`;
-            }
-            
-            // Years of experience
-            if (message.match(/how long|years|experience|established|founded|since when/i)) {
-                return `Corona Schools has been providing world-class education for ${coronaData.schoolInfo.yearsOfExistence} years, building leaders of tomorrow with sound values that last.`;
-            }
-            
-            // Student count
-            if (message.match(/how many students|student population|enrollment|number of students/i)) {
-                return `Corona Schools represents over ${coronaData.schoolInfo.totalStudents}+ current and past students across our ${coronaData.schoolInfo.numberOfSchools} schools.`;
-            }
-            
-            // Quality/Excellence
-            if (message.match(/quality|excellent|best|top|world-class|standard/i)) {
-                return `Corona Schools is committed to world-class education in all facets of our operations – curriculum, teaching methodologies, staff quality, libraries, technology, infrastructure, and more. We focus on developing students with the skills to compete globally while maintaining high moral and ethical values.`;
-            }
-            
-            // Benefits of Corona Schools
-            if (message.match(/benefit|why|advantage|what can i|what will my child|gain|get from|why should i/i)) {
-                return `Here are the key benefits of Corona Schools for your child:\n\n**Academic Excellence**\n• 70 years of proven track record with generations of success\n• World-class curriculum blending Nigerian and international standards\n• NEASC Accreditation - only secondary school in Africa with this prestigious certification\n• ACCA qualification - only secondary school in Nigeria where students pass ACCA foundation level\n\n**Character & Values Development**\n• Strong moral and ethical foundation as core mission\n• Well-rounded education developing the whole person\n• Leadership preparation for tomorrow's leaders\n\n**Diverse Learning Opportunities**\n• 30+ co-curricular activities: Music, sports (rugby, basketball, taekwondo), STEAM, debate, MUN, drama, and more\n• Montessori method for early childhood development\n• Technology integration with Microsoft Showcase School status\n\n**Global Competitiveness**\n• International curriculum standards preparing for top universities worldwide\n• 35,000+ successful alumni excelling globally\n• Multilingual education: French, German, Hausa, Igbo, Yoruba\n\n**Quality Infrastructure & Support**\n• State-of-the-art facilities: modern libraries, technology labs, sports facilities\n• 668 qualified academic and non-academic professionals\n• Flexible boarding and day school options\n\n**Recognition & Awards**\n• British Council Community Initiative Award 2019\n• 187 Microsoft Certified Experts on staff\n• Gbagada campus: foremost rugby school in Lagos State`;
-            }
-            
-            // Boarding
-            if (message.match(/boarding|residential|hostel|accommodation|live on campus/i)) {
-                return `Corona Schools offers both Boarding and Day School options for students. Our boarding facilities provide a supportive environment where students develop independence, leadership, and strong community bonds while receiving world-class education.`;
-            }
-            
-            // Scholarship
-            if (message.match(/scholarship|financial aid|bursary|grant|sponsorship|cost|fee/i)) {
-                return `Corona Schools offers scholarship programs as part of our commitment to making quality education accessible. Scholarship Entrance Examination Registration is ongoing for the 2025/2026 academic year. Please contact our admissions office for details on eligibility and application procedures.`;
-            }
-            
-            // Thanks/Appreciation
+            // Thanks
             if (message.match(/thank|thanks|appreciate|grateful/i)) {
                 return "You're welcome! I'm happy to help. Do you have any other questions about Corona Schools?";
-            }
+            }ch
             
-            // Default intelligent response
-            return `That's a great question! While I don't have specific information about that topic, I can tell you that Corona Schools is dedicated to providing world-class education across all areas. We have ${coronaData.schoolInfo.numberOfSchools} schools with ${coronaData.schoolInfo.staffCount} dedicated staff members serving over ${coronaData.schoolInfo.totalStudents}+ students.\n\nI can help you with information about:\n• Admissions and enrollment\n• Curriculum and programs\n• Facilities and infrastructure\n• Co-curricular activities\n• Accreditations and awards\n• Staff and alumni\n\nWould you like to know more about any of these areas?`;
+            // Default response
+            return `I can help you with information about Corona Schools including:\n\n• Leadership and school heads\n• School locations (Ikoyi, Lekki, Agbara, Gbagada)\n• Curriculum and programs\n• Admissions process\n• Co-curricular activities\n• Accreditations and awards\n• General information\n\nWhat would you like to know?`;
         }
 
         // Chat functionality
@@ -660,7 +655,7 @@
                 chatMessages.innerHTML = `
                     <div class="message bot-message">
                         <div class="message-content">
-                            <p>Chat cleared! Hello! I'm Corona Bot. What would you like to know about Corona Schools?</p>
+                            <p>Chat cleared! Hello! I'm Corona School Bot. What would you like to know about Corona Schools?</p>
                         </div>
                     </div>
                 `;
