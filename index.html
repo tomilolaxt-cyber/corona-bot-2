@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corona Bot - Ask About Corona Schools</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>Corona Bot</h1>
+                <p>Your AI Assistant for Corona Schools Information</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <p>Hello! I'm Corona Bot, your AI assistant for Corona Schools. Ask me anything about our schools, curriculum, admissions, facilities, or any other information you'd like to know!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chatForm" class="chat-form">
+                        <input 
+                            type="text" 
+                            id="userInput" 
+                            class="chat-input" 
+                            placeholder="Ask me about Corona Schools..." 
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="send-btn">Send</button>
+                    </form>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="quick-links">
+                    <h3>Quick Links</h3>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about Corona Schools')">About Corona Schools</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What are the admission requirements?')">Admissions</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What curriculum do you offer?')">Curriculum</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What are the co-curricular activities?')">Activities</button>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about the facilities')">Facilities</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>Corona Schools Info</h3>
+                    <ul>
+                        <li><strong>8 Schools</strong> across Nigeria</li>
+                        <li><strong>70 Years</strong> of excellence</li>
+                        <li><strong>35,000+</strong> students</li>
+                        <li><strong>668</strong> staff members</li>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corona Bot - AI Assistant for Corona Schools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #ff1b02 0%, #a80000 100%);
+            color: rgb(255, 0, 0);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 12px;
+            padding: 12px 16px;
+            max-width: 70%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .bot-message .message-content {
+            background: #f0f0f0;
+            color: #333;
+            border-radius: 12px 12px 12px 0;
+            padding: 12px 16px;
+            max-width: 70%;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+
+        .message-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .message-content ul {
+            margin: 10px 0 0 20px;
+            line-height: 1.8;
+        }
+
+        .message-content li {
+            margin: 5px 0;
+        }
+
+        /* Chat Input Area */
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 10px;
+            display: none;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            margin: 0 4px;
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            40% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .quick-links,
+        .info-box,
+        .action-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .quick-links h3,
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .quick-link-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .quick-link-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .info-box ul {
+            list-style: none;
+        }
+
+        .info-box li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95em;
+        }
+
+        .info-box li:last-child {
+            border-bottom: none;
+        }
+
+        .info-box strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .user-message .message-content,
+            .bot-message .message-content {
+                max-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .chat-input {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>🤖 Corona Bot</h1>
+                <p>AI Assistant for Corona Schools Information</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <p>Hello! I'm Corona Bot, your AI assistant for Corona Schools. Ask me anything about our schools, curriculum, admissions, facilities, or any other information you'd like to know!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chatForm" class="chat-form">
+                        <input 
+                            type="text" 
+                            id="userInput" 
+                            class="chat-input" 
+                            placeholder="Ask me about Corona Schools..." 
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="send-btn">Send</button>
+                    </form>
+                    <div class="loading" id="loading">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="quick-links">
+                    <h3>Quick Questions</h3>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about Corona Schools')">About Corona Schools</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What are the admission requirements?')">Admissions</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What curriculum do you offer?')">Curriculum</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What are the co-curricular activities?')">Activities</button>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about the facilities')">Facilities</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What accreditations do you have?')">Accreditations</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>📊 Corona Schools Stats</h3>
+                    <ul>
+                        <li><strong>70 Years</strong> of excellence</li>
+                        <li><strong>8 Schools</strong> across Nigeria</li>
+                        <li><strong>35,000+</strong> students</li>
+                        <li><strong>668</strong> staff members</li>
+                    </ul>
+                </div>
+
+                <div class="action-box">
+                    <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        // Corona Schools Knowledge Base
+        const coronaData = {
+            schoolInfo: {
+                name: "Corona Schools' Trust Council",
+                yearsOfExistence: 70,
+                numberOfSchools: 8,
+                totalStudents: 35000,
+                staffCount: 668,
+                mission: "To provide world-class education to children. We inculcate high moral and ethical values in our students as we prepare them for lifelong learning, service and fulfillment.",
+                vision: "To be Nigeria's leading educational institution focused on and dedicated to producing well-rounded and proudly Nigerian young men and women equipped for continuous learning, personal mastery and leadership.",
+                location: "Nigeria",
+                schools: [
+                    "Corona Secondary School Agbara (NEASC Accredited)",
+                    "Corona School Gbagada (Rugby School)",
+                    "Multiple primary and nursery schools"
+                ]
+            },
+            curriculum: {
+                nursery: "Montessori method supporting learning in all curriculum areas",
+                primary: "Blend of Nigerian and International Primary Curriculum (IPC)",
+                secondary: "Blend of Nigerian and British curricula preparing students for top undergraduate programmes worldwide"
+            },
+            accreditations: [
+                "NEASC Accreditation (only Secondary School in Africa)",
+                "ACCA Foundation Level (only secondary school in Nigeria)",
+                "British Council Community Initiative Award 2019",
+                "Microsoft Showcase/Incubator Schools",
+                "158 Microsoft Innovative Experts",
+                "187 Microsoft Certified Experts"
+            ],
+            activities: [
+                "Music", "Taekwondo", "Athletics", "Ballet", "Golf", "Cheerleading",
+                "Dance", "Basketball", "Drama", "French", "Chess", "STEAM",
+                "Model United Nations", "Public Speaking", "Debating", "Cooking Club",
+                "Rugby", "German", "Hausa", "Igbo", "Yoruba", "Reading", "Football"
+            ],
+            admissions: {
+                currentYear: "2025/2026",
+                levels: "Year 7-11",
+                types: ["Boarding", "Day School"],
+                programs: ["Regular", "Scholarship"],
+                status: "Ongoing"
+            }
+        };
+
+        // AI Response Generator with Common Sense
+        function generateSmartResponse(userMessage) {
+            const message = userMessage.toLowerCase().trim();
+            
+            // Greeting responses
+            if (message.match(/^(hi|hello|hey|greetings|good morning|good afternoon|good evening)/i)) {
+                return "Hello! Welcome to Corona Bot. I'm here to help you learn about Corona Schools. What would you like to know?";
+            }
+            
+            // How are you
+            if (message.match(/how are you|how's it going|how do you feel/i)) {
+                return "I'm doing great, thank you for asking! I'm here and ready to help you with any questions about Corona Schools. What can I tell you?";
+            }
+            
+            // About Corona Schools
+            if (message.match(/about|who are you|what is corona|tell me about|introduce/i)) {
+                return `Corona Schools' Trust Council is a prestigious educational institution in Nigeria with ${coronaData.schoolInfo.yearsOfExistence} years of excellence. We operate ${coronaData.schoolInfo.numberOfSchools} schools representing over ${coronaData.schoolInfo.totalStudents}+ students.\n\nOur Mission: To provide world-class education to children, inculcating high moral and ethical values as we prepare them for lifelong learning, service and fulfillment.\n\nOur Vision: To be Nigeria's leading educational institution focused on producing well-rounded and proudly Nigerian young men and women equipped for continuous learning, personal mastery and leadership.\n\nKey Stats:\n• 70 years of educational excellence\n• 8 schools across Nigeria\n• 35,000+ students (current and past)\n• 668 experienced staff members\n• International recognition and accreditations`;
+            }
+            
+            // Mission and Vision
+            if (message.match(/mission|vision|goal|purpose|what do you aim/i)) {
+                return `Mission: ${coronaData.schoolInfo.mission}\n\nVision: ${coronaData.schoolInfo.vision}`;
+            }
+            
+            // Admissions
+            if (message.match(/admission|enroll|register|apply|entrance|how to join|get in/i)) {
+                return `Corona Schools is currently accepting admissions for ${coronaData.admissions.currentYear} into ${coronaData.admissions.levels} for both ${coronaData.admissions.types.join(' & ')} options. We offer both regular and scholarship programs. Entrance Examination Registration is ongoing. We welcome students from diverse backgrounds!`;
+            }
+            
+            // Curriculum
+            if (message.match(/curriculum|subjects|program|course|what do you teach|education|learning/i)) {
+                return `**Our Comprehensive Curriculum:**\n\n**Nursery Schools:**\n• Montessori method supporting learning in all curriculum areas\n• Focus on early childhood development and foundational skills\n\n**Primary Schools:**\n• Blend of Nigerian and International Primary Curriculum (IPC)\n• Carefully aligned with international standards\n• Develops critical thinking and global awareness\n\n**Secondary Schools:**\n• Blend of Nigerian and British curricula\n• Prepares students for entry to top advanced level undergraduate programmes across the world\n• Rigorous academic standards with practical application\n\n**Special Programs:**\n• ACCA Foundation Level (unique in Nigeria)\n• Microsoft technology certification programs\n• STEAM education integration\n• Language programs: French, German, Hausa, Igbo, Yoruba`;
+            }
+            
+            // Facilities
+            if (message.match(/facilities|infrastructure|campus|library|technology|building|sports|lab/i)) {
+                return `Corona Schools boasts world-class facilities including modern libraries, advanced technology infrastructure, sports facilities, and state-of-the-art learning spaces. We are Microsoft Showcase/Incubator Schools with ${coronaData.accreditations[4]} and ${coronaData.accreditations[5]} on staff.`;
+            }
+            
+            // Activities
+            if (message.match(/activities|co-curricular|sports|clubs|music|drama|rugby|what can i do|extracurricular/i)) {
+                return `**30+ Co-Curricular Activities:**\n\nWe offer diverse programs to develop well-rounded students:\n\n**Sports:**\n• Rugby (Gbagada is a 4-time trophy winner)\n• Basketball\n• Athletics\n• Taekwondo\n• Golf\n• Football\n\n**Arts & Culture:**\n• Music\n• Drama\n• Ballet\n• Dance\n• Cheerleading\n\n**Academic & Leadership:**\n• Model United Nations\n• Public Speaking & Debating\n• Chess\n• STEAM programs\n• Go Techy (Animation)\n• Young Writer's Workshop\n\n**Languages & Skills:**\n• French\n• German\n• Hausa, Igbo, Yoruba\n• Jolly Phonics/Elocution\n• Reading Club\n\n**Other Clubs:**\n• Cooking Club\n• Brownies\n• ICT Club\n\nThese activities develop leadership, teamwork, creativity, and diverse talents in our students.`;
+            }
+            
+            // Accreditations
+            if (message.match(/accreditation|award|certified|recognition|neasc|acca|british council/i)) {
+                return `**Prestigious Accreditations & Awards:**\n\n**NEASC Accreditation:**\n• Corona Secondary School Agbara is the ONLY Secondary School in Africa accredited by NEASC\n• Represents highest international standards\n• Globally recognized certification\n\n**ACCA Program:**\n• Only secondary school in Nigeria where students pass the foundation level of Association of Chartered Certified Accountants\n• Unique accounting qualification opportunity\n• Prepares students for professional accounting careers\n\n**British Council Award:**\n• Won Community Initiative Award 2019\n• Recognized for student-led water borehole initiative\n• Demonstrates commitment to social responsibility\n\n**Microsoft Recognition:**\n• Microsoft Showcase/Incubator School status\n• 158 Microsoft Innovative Experts\n• 187 Microsoft Certified Experts on staff\n• Leader in technology education\n\nThese accreditations and awards demonstrate Corona Schools' commitment to excellence, innovation, and preparing students for global success.`;
+            }
+            
+            // Staff
+            if (message.match(/staff|teachers|employees|faculty|how many teachers|expert/i)) {
+                return `Corona Schools employs ${coronaData.schoolInfo.staffCount} experienced academic and non-academic staff dedicated to providing world-class education. Our team includes Microsoft Certified Experts and innovative educators committed to student success.`;
+            }
+            
+            // Alumni
+            if (message.match(/alumni|graduates|past students|network|where do graduates go/i)) {
+                return `Corona Schools has a most influential alumni network with over ${coronaData.schoolInfo.totalStudents}+ current and past students. Our alumni excel globally, contributing to various fields and maintaining strong connections with the school community.`;
+            }
+            
+            // Location
+            if (message.match(/location|where|address|school|agbara|gbagada|lagos|which schools/i)) {
+                return `Corona Schools operates ${coronaData.schoolInfo.numberOfSchools} schools across ${coronaData.schoolInfo.location} including:\n\n• ${coronaData.schoolInfo.schools.join('\n• ')}`;
+            }
+            
+            // Number of schools
+            if (message.match(/how many schools|number of schools|schools do you have/i)) {
+                return `Corona Schools operates ${coronaData.schoolInfo.numberOfSchools} schools across Nigeria, representing over ${coronaData.schoolInfo.totalStudents}+ students.`;
+            }
+            
+            // Years of experience
+            if (message.match(/how long|years|experience|established|founded|since when/i)) {
+                return `Corona Schools has been providing world-class education for ${coronaData.schoolInfo.yearsOfExistence} years, building leaders of tomorrow with sound values that last.`;
+            }
+            
+            // Student count
+            if (message.match(/how many students|student population|enrollment|number of students/i)) {
+                return `Corona Schools represents over ${coronaData.schoolInfo.totalStudents}+ current and past students across our ${coronaData.schoolInfo.numberOfSchools} schools.`;
+            }
+            
+            // Quality/Excellence
+            if (message.match(/quality|excellent|best|top|world-class|standard/i)) {
+                return `Corona Schools is committed to world-class education in all facets of our operations – curriculum, teaching methodologies, staff quality, libraries, technology, infrastructure, and more. We focus on developing students with the skills to compete globally while maintaining high moral and ethical values.`;
+            }
+            
+            // Benefits of Corona Schools
+            if (message.match(/benefit|why|advantage|what can i|what will my child|gain|get from|why should i/i)) {
+                return `Here are the key benefits of Corona Schools for your child:\n\n**Academic Excellence**\n• 70 years of proven track record with generations of success\n• World-class curriculum blending Nigerian and international standards\n• NEASC Accreditation - only secondary school in Africa with this prestigious certification\n• ACCA qualification - only secondary school in Nigeria where students pass ACCA foundation level\n\n**Character & Values Development**\n• Strong moral and ethical foundation as core mission\n• Well-rounded education developing the whole person\n• Leadership preparation for tomorrow's leaders\n\n**Diverse Learning Opportunities**\n• 30+ co-curricular activities: Music, sports (rugby, basketball, taekwondo), STEAM, debate, MUN, drama, and more\n• Montessori method for early childhood development\n• Technology integration with Microsoft Showcase School status\n\n**Global Competitiveness**\n• International curriculum standards preparing for top universities worldwide\n• 35,000+ successful alumni excelling globally\n• Multilingual education: French, German, Hausa, Igbo, Yoruba\n\n**Quality Infrastructure & Support**\n• State-of-the-art facilities: modern libraries, technology labs, sports facilities\n• 668 qualified academic and non-academic professionals\n• Flexible boarding and day school options\n\n**Recognition & Awards**\n• British Council Community Initiative Award 2019\n• 187 Microsoft Certified Experts on staff\n• Gbagada campus: foremost rugby school in Lagos State`;
+            }
+            
+            // Boarding
+            if (message.match(/boarding|residential|hostel|accommodation|live on campus/i)) {
+                return `Corona Schools offers both Boarding and Day School options for students. Our boarding facilities provide a supportive environment where students develop independence, leadership, and strong community bonds while receiving world-class education.`;
+            }
+            
+            // Scholarship
+            if (message.match(/scholarship|financial aid|bursary|grant|sponsorship|cost|fee/i)) {
+                return `Corona Schools offers scholarship programs as part of our commitment to making quality education accessible. Scholarship Entrance Examination Registration is ongoing for the 2025/2026 academic year. Please contact our admissions office for details on eligibility and application procedures.`;
+            }
+            
+            // Thanks/Appreciation
+            if (message.match(/thank|thanks|appreciate|grateful/i)) {
+                return "You're welcome! I'm happy to help. Do you have any other questions about Corona Schools?";
+            }
+            
+            // Default intelligent response
+            return `That's a great question! While I don't have specific information about that topic, I can tell you that Corona Schools is dedicated to providing world-class education across all areas. We have ${coronaData.schoolInfo.numberOfSchools} schools with ${coronaData.schoolInfo.staffCount} dedicated staff members serving over ${coronaData.schoolInfo.totalStudents}+ students.\n\nI can help you with information about:\n• Admissions and enrollment\n• Curriculum and programs\n• Facilities and infrastructure\n• Co-curricular activities\n• Accreditations and awards\n• Staff and alumni\n\nWould you like to know more about any of these areas?`;
+        }
+
+        // Chat functionality
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const sendBtn = document.querySelector('.send-btn');
+        const loading = document.getElementById('loading');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            
+            if (message) {
+                addMessage(message, 'user');
+                userInput.value = '';
+                sendBtn.disabled = true;
+                loading.style.display = 'block';
+                
+                try {
+                    // Call Flask backend API
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: message })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        addMessage(data.response, 'bot');
+                    } else {
+                        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('Sorry, I cannot connect to the server. Make sure Flask is running on port 3000.', 'bot');
+                } finally {
+                    sendBtn.disabled = false;
+                    loading.style.display = 'none';
+                    userInput.focus();
+                }
+            }
+        });
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const p = document.createElement('p');
+            p.textContent = text;
+            
+            contentDiv.appendChild(p);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function askQuestion(question) {
+            userInput.value = question;
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+
+        function clearChat() {
+            if (confirm('Are you sure you want to clear the chat?')) {
+                chatMessages.innerHTML = `
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <p>Chat cleared! Hello! I'm Corona Bot. What would you like to know about Corona Schools?</p>
+                        </div>
+                    </div>
+                `;
+                userInput.focus();
+            }
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>

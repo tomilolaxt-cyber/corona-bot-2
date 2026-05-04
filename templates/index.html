@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corona Bot - AI Assistant for Corona Schools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>🤖 Corona Bot</h1>
+                <p>AI Assistant for Corona Schools Information</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <p>Hello! I'm Corona Bot, an AI assistant powered by advanced AI technology. I'm here to answer all your questions about Corona Schools - from admissions and curriculum to facilities and activities. What would you like to know?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chatForm" class="chat-form">
+                        <input 
+                            type="text" 
+                            id="userInput" 
+                            class="chat-input" 
+                            placeholder="Ask me anything about Corona Schools..." 
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="send-btn">Send</button>
+                    </form>
+                    <div class="loading" id="loading" style="display: none;">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="quick-links">
+                    <h3>Quick Questions</h3>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about Corona Schools')">About Corona Schools</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What are the admission requirements and process?')">Admissions</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What curriculum and programs do you offer?')">Curriculum</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What co-curricular activities are available?')">Activities</button>
+                    <button class="quick-link-btn" onclick="askQuestion('Tell me about the facilities and infrastructure')">Facilities</button>
+                    <button class="quick-link-btn" onclick="askQuestion('What accreditations does Corona Schools have?')">Accreditations</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>📊 Corona Schools Stats</h3>
+                    <ul>
+                        <li><strong>70 Years</strong> of excellence</li>
+                        <li><strong>8 Schools</strong> across Nigeria</li>
+                        <li><strong>35,000+</strong> students</li>
+                        <li><strong>668</strong> staff members</li>
+                    </ul>
+                </div>
+
+                <div class="action-box">
+                    <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
