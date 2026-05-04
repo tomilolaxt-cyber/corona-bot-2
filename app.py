@@ -73,29 +73,14 @@ conversation_history = []
 def get_ai_response(user_message):
     """Get response from Gemini AI with Corona Schools context"""
     try:
-        # Add user message to history
-        conversation_history.append({
-            "role": "user",
-            "parts": [user_message]
-        })
-        
-        # Create the model
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        # Create chat session with history
-        chat = model.start_chat(history=conversation_history)
+        # Create the model with correct API version
+        model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
         
         # Send message with context
         full_prompt = f"{CORONA_CONTEXT}\n\nUser Question: {user_message}"
-        response = chat.send_message(full_prompt)
+        response = model.generate_content(full_prompt)
         
         bot_response = response.text
-        
-        # Add bot response to history
-        conversation_history.append({
-            "role": "model",
-            "parts": [bot_response]
-        })
         
         return bot_response
     
