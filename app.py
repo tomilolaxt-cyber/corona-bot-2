@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+from corona_data import CORONA_COMPREHENSIVE
 
 # Load corona.env
 load_dotenv('corona.env')
@@ -9,216 +10,282 @@ load_dotenv('corona.env')
 app = Flask(__name__)
 CORS(app)
 
-# Corona Schools Knowledge Base - Updated 2026
-CORONA_KNOWLEDGE = {
-    "leadership": {
-        "trust_council": {
-            "chairman": "Mr. Olaniyi Yusuf (Appointed early 2026)",
-            "director_of_education": "Mrs. Adetokunbo Matilukuro",
-            "ceo": "Mrs. Adeyoyin Adesina"
-        },
-        "schools": {
-            "ikoyi_primary": {
-                "head": "Mrs. Funlola Olorunishola (Since 2022)",
-                "location": "6 Mekunwen Road, Ikoyi",
-                "houses": ["Crane", "Weaver", "Kingfisher", "Heron"],
-                "curriculum": "Blend of Nigerian National Curriculum and British National Curriculum"
-            },
-            "lekki_primary": {
-                "head": "Mrs. Grace Omo-Egbekuse",
-                "location": "Abijo GRA, Lekki",
-                "focus": "Technology and innovation, robotics competitions (Pi Wars)"
-            },
-            "lekki_secondary": {
-                "principal": "Mr. Amoo",
-                "location": "Abijo GRA, Lekki",
-                "type": "Day Secondary School"
-            },
-            "agbara_secondary": {
-                "principal": "Mr. Chijioke Anyanwu",
-                "location": "Agbara Estate",
-                "type": "Boarding Secondary School",
-                "accreditation": "NEASC Accredited - only in Africa"
-            },
-            "gbagada": {
-                "location": "Gbagada, Lagos",
-                "specialty": "Foremost Rugby School in Lagos State, 4-time trophy winner"
-            }
-        }
-    },
-    "general_info": {
-        "years_of_excellence": 70,
-        "total_schools": 8,
-        "total_students": "35,000+",
-        "staff_count": 668,
-        "mission": "Provide world-class education with high moral and ethical values",
-        "vision": "Be Nigeria's leading educational institution producing well-rounded young men and women"
-    },
-    "curriculum": {
-        "nursery": "Montessori method",
-        "primary": "Blend of Nigerian and International Primary Curriculum (IPC)",
-        "secondary": "Blend of Nigerian and British curricula"
-    },
-    "accreditations": [
-        "NEASC Accreditation (Corona Secondary School Agbara - only in Africa)",
-        "ACCA Foundation Level (only secondary school in Nigeria)",
-        "British Council Community Initiative Award 2019",
-        "Microsoft Showcase/Incubator Schools",
-        "158 Microsoft Innovative Experts",
-        "187 Microsoft Certified Experts"
-    ],
-    "activities": [
-        "Music", "Taekwondo", "Athletics", "Ballet", "Golf", "Cheerleading",
-        "Dance", "Basketball", "Drama", "French", "Chess", "STEAM",
-        "Model United Nations", "Public Speaking", "Debating", "Cooking Club",
-        "Rugby", "German", "Hausa", "Igbo", "Yoruba", "Reading", "Football",
-        "Robotics (Pi Wars)"
-    ],
-    "admissions": {
-        "year": "2025/2026",
-        "levels": "Year 7-11",
-        "types": ["Boarding", "Day School"],
-        "programs": ["Regular", "Scholarship"]
-    }
-}
-
 def generate_response(user_message):
-    """Generate intelligent response based on Corona Schools knowledge"""
+    """Generate intelligent response based on comprehensive Corona Schools knowledge"""
     message = user_message.lower().strip()
+    data = CORONA_COMPREHENSIVE
     
-    # Leadership questions
-    if any(word in message for word in ['chairman', 'ceo', 'director', 'leadership', 'who leads', 'who runs']):
+    # Greeting
+    if any(word in message for word in ['hi', 'hello', 'hey', 'greetings']):
+        return "Hello! Welcome to Corona School Bot. I have comprehensive information about all Corona Schools campuses, leadership, curriculum, fees, and more. What would you like to know?"
+    
+    # History and founding
+    if any(word in message for word in ['history', 'founded', 'established', 'when', 'how old', 'years']):
+        return f"""**Corona Schools History:**
+
+• Founded: {data['history']['founded']}
+• Incorporated: {data['history']['incorporated']}
+• Founding Chairman: {data['history']['founding_chairman']}
+• Total Alumni: {data['history']['total_alumni']}
+• Staff: {data['history']['staff_count']}
+• Heritage: 70 years of educational excellence in Nigeria"""
+    
+    # Leadership and governance
+    if any(word in message for word in ['chairman', 'ceo', 'director', 'leadership', 'governance', 'who leads']):
+        gov = data['governance']
         return f"""**Corona Schools Leadership (2026):**
 
-**Trust Council:**
-• Chairman: {CORONA_KNOWLEDGE['leadership']['trust_council']['chairman']}
-• Director of Education: {CORONA_KNOWLEDGE['leadership']['trust_council']['director_of_education']}
-• CEO/Trust Council Secretary: {CORONA_KNOWLEDGE['leadership']['trust_council']['ceo']}
+**Governing Board:**
+• Chairman: {gov['chairman']}
+• Previous Chairman: {gov['previous_chairman']}
 
-**School Heads:**
-• Ikoyi Primary: {CORONA_KNOWLEDGE['leadership']['schools']['ikoyi_primary']['head']}
-• Lekki Primary: {CORONA_KNOWLEDGE['leadership']['schools']['lekki_primary']['head']}
-• Lekki Secondary: Principal {CORONA_KNOWLEDGE['leadership']['schools']['lekki_secondary']['principal']}
-• Agbara Secondary: Principal {CORONA_KNOWLEDGE['leadership']['schools']['agbara_secondary']['principal']}"""
+**Executive Team:**
+• CEO: {gov['ceo']}
+• Director of Education: {gov['director_of_education']}
+• Finance Controller: {gov['finance_controller']}
+• Head of Corporate Services: {gov['head_corporate_services']}
+• HR Manager: {gov['hr_manager']}
+• Infrastructure Manager: {gov['infrastructure_manager']}
+
+**Office Location:** {gov['office_location']}"""
     
-    # Ikoyi questions
+    # Ikoyi schools
     if 'ikoyi' in message:
-        school = CORONA_KNOWLEDGE['leadership']['schools']['ikoyi_primary']
-        return f"""**Corona School, Ikoyi:**
+        nursery = data['schools']['ikoyi_day_nursery']
+        primary = data['schools']['ikoyi_primary']
+        return f"""**Corona Schools, Ikoyi:**
 
-• Head of School: {school['head']}
-• Location: {school['location']}
-• Curriculum: {school['curriculum']}
-• Houses: {', '.join(school['houses'])}
-• Known for: "Total Child" approach and strong tradition
-• Type: Flagship primary school"""
+**Day Nursery:**
+• Head: {nursery['head']}
+• Location: {nursery['location']}
+• Method: {nursery['method']}
+• Description: {nursery['description']}
+
+**Primary School:**
+• Head: {primary['head']}
+• Location: {primary['location']}
+• Established: {primary['established']}
+• Students: {primary['students']}
+• Houses: {', '.join(primary['houses'])}
+• Notable Alumni: {primary['notable_alumni']}
+• Curriculum: {primary['curriculum']}"""
     
-    # Lekki questions
+    # Victoria Island
+    if 'victoria' in message or 'vi ' in message:
+        school = data['schools']['victoria_island']
+        return f"""**{school['name']}:**
+
+• Head: {school['head']}
+• Location: {school['location']}
+• Established: {school['established']}
+• Students: {school['students']}
+• Classrooms: {school['classrooms']}
+• Demographic: {school['demographic']}"""
+    
+    # Gbagada
+    if 'gbagada' in message:
+        school = data['schools']['gbagada']
+        return f"""**{school['name']}:**
+
+• Head: {school['head']}
+• Location: {school['location']}
+• Sections: {', '.join(school['sections'])}
+• Specialty: {school['specialty']}"""
+    
+    # Lekki
     if 'lekki' in message:
-        primary = CORONA_KNOWLEDGE['leadership']['schools']['lekki_primary']
-        secondary = CORONA_KNOWLEDGE['leadership']['schools']['lekki_secondary']
+        primary = data['schools']['lekki_primary']
+        secondary = data['schools']['lekki_secondary']
         return f"""**Corona Schools, Lekki:**
 
 **Primary School:**
-• Head of School: {primary['head']}
+• Name: {primary['name']}
+• Head: {primary['head']}
 • Location: {primary['location']}
-• Focus: {primary['focus']}
+• Established: {primary['established']} (Permanent site: {primary['permanent_site']})
+• Specialty: {primary['specialty']}
+• Competitions: {primary['competitions']}
 
-**Day Secondary School (CDSS):**
-• Principal: {secondary['principal']}
+**Day Secondary School:**
+• Name: {secondary['name']}
+• Head: {secondary['head']}
 • Location: {secondary['location']}
+• Established: {secondary['established']}
 • Type: {secondary['type']}
-• Context: Day-school option for families in Lekki/Ajah axis"""
+• Serves: {secondary['serves']}"""
     
-    # Agbara questions
+    # Agbara
     if 'agbara' in message:
-        school = CORONA_KNOWLEDGE['leadership']['schools']['agbara_secondary']
-        return f"""**Corona Secondary School, Agbara:**
+        school = data['schools']['agbara_secondary']
+        return f"""**{school['name']}:**
 
-• Principal: {school['principal']}
+• Head: {school['head']}
 • Location: {school['location']}
+• Established: {school['established']}
 • Type: {school['type']}
 • Accreditation: {school['accreditation']}
-• Special: Only secondary school in Africa with NEASC accreditation"""
+• Technology: {school['wifi']}, {school['learning_platform']}
+
+**Special Recognition:** Only secondary school in Africa with NEASC accreditation"""
     
-    # Gbagada questions
-    if 'gbagada' in message:
-        school = CORONA_KNOWLEDGE['leadership']['schools']['gbagada']
-        return f"""**Corona School, Gbagada:**
-
-• Location: {school['location']}
-• Specialty: {school['specialty']}
-• Known for: Excellence in Rugby sports"""
-    
-    # About/General info
-    if any(word in message for word in ['about', 'what is corona', 'tell me about', 'introduce']):
-        info = CORONA_KNOWLEDGE['general_info']
-        return f"""**About Corona Schools:**
-
-Corona Schools' Trust Council is a prestigious educational institution in Nigeria with {info['years_of_excellence']} years of excellence.
-
-**Key Stats:**
-• {info['total_schools']} schools across Nigeria
-• {info['total_students']} students (current and past)
-• {info['staff_count']} experienced staff members
-
-**Mission:** {info['mission']}
-
-**Vision:** {info['vision']}"""
-    
-    # Curriculum questions
-    if any(word in message for word in ['curriculum', 'subjects', 'program', 'what do you teach']):
-        curr = CORONA_KNOWLEDGE['curriculum']
+    # Curriculum
+    if any(word in message for word in ['curriculum', 'subjects', 'program', 'what do you teach', 'scheme of work']):
+        curr = data['curriculum']
         return f"""**Corona Schools Curriculum:**
 
-**Nursery:** {curr['nursery']}
+**Early Years (Montessori Method):**
+• Creche 1 (0-18 months): {curr['early_years']['age_groups']['creche_1']['focus']}
+• Creche 2 (2 years): {', '.join(curr['early_years']['age_groups']['creche_2']['subjects'][:5])}
+• Nursery One (3 years): {', '.join(curr['early_years']['age_groups']['nursery_one']['subjects'][:4])}
+• Nursery Two (4 years): {', '.join(curr['early_years']['age_groups']['nursery_two']['subjects'][:4])}
 
-**Primary:** {curr['primary']}
+**Primary ({curr['primary']['system']}):**
+• Core: {', '.join(curr['primary']['core_subjects'])}
+• Languages: {', '.join(curr['primary']['languages'])}
+• Technical: {', '.join(curr['primary']['technical'][:3])}
 
-**Secondary:** {curr['secondary']}
-
-All programs focus on developing well-rounded students with strong academic foundations and moral values."""
+**Secondary:**
+• Local Exams: {', '.join(curr['secondary']['local_exams'])}
+• International: {', '.join(curr['secondary']['international_exams'])}
+• Special: {curr['secondary']['special_program']}"""
     
-    # Activities questions
+    # Fees
+    if any(word in message for word in ['fee', 'cost', 'tuition', 'price', 'how much', 'payment']):
+        fees = data['fees_2024_2025']
+        return f"""**Corona Schools Fees (2024/2025):**
+
+**Creche/Playschool:**
+• Annual: {fees['creche_playschool']['annual']}
+• Per Term: {fees['creche_playschool']['per_term']}
+• Application: {fees['creche_playschool']['application_form']}
+
+**Nursery:**
+• Annual: {fees['nursery']['annual']}
+• Per Term: {fees['nursery']['per_term']}
+• Application: {fees['nursery']['application_form']}
+
+**Primary:**
+• Annual: {fees['primary']['annual']}
+• Per Term: {fees['primary']['per_term']}
+• Application: {fees['primary']['application_form']}
+
+**Secondary Day:**
+• Annual: {fees['secondary_day']['annual']}
+• Per Term: {fees['secondary_day']['per_term']}
+
+**Secondary Boarding:**
+• Annual: {fees['secondary_boarding']['annual']}
+• Per Term: {fees['secondary_boarding']['per_term']}"""
+    
+    # Activities
     if any(word in message for word in ['activities', 'sports', 'clubs', 'co-curricular', 'extracurricular']):
-        activities = CORONA_KNOWLEDGE['activities']
-        return f"""**Co-Curricular Activities at Corona Schools:**
+        activities = data['co_curricular']
+        return f"""**Co-Curricular Activities:**
 
-We offer 30+ diverse activities including:
+**Sports:** {', '.join(activities['sports'][:8])}
 
-{', '.join(activities[:15])}
+**Academic Clubs:** {', '.join(activities['academic_clubs'])}
 
-And many more! These activities develop leadership, teamwork, creativity, and diverse talents."""
+**Creative Arts:** {', '.join(activities['creative'])}
+
+**Life Skills:** {', '.join(activities['life_skills'][:5])}
+
+**Languages:** {', '.join(activities['languages'])}
+
+**Special Achievements:** {activities['special_achievements']}"""
+    
+    # Calendar
+    if any(word in message for word in ['calendar', 'term', 'resumption', 'when does school', 'holiday']):
+        cal = data['academic_calendar_2025_2026']
+        return f"""**Academic Calendar 2025/2026:**
+
+**First Term:** {cal['first_term']['period']}
+Events: {', '.join(cal['first_term']['events'][:3])}
+
+**Second Term:** {cal['second_term']['period']}
+Events: {', '.join(cal['second_term']['events'][:3])}
+
+**Third Term:** {cal['third_term']['period']}
+Events: {', '.join(cal['third_term']['events'])}"""
     
     # Accreditations
-    if any(word in message for word in ['accreditation', 'award', 'certified', 'recognition']):
-        accreds = CORONA_KNOWLEDGE['accreditations']
-        return "**Corona Schools Accreditations & Awards:**\n\n• " + "\n• ".join(accreds)
+    if any(word in message for word in ['accreditation', 'award', 'certified', 'recognition', 'neasc', 'acca']):
+        return "**Corona Schools Accreditations & Awards:**\n\n• " + "\n• ".join(data['accreditations'])
     
-    # Admissions
-    if any(word in message for word in ['admission', 'enroll', 'register', 'apply', 'how to join']):
-        adm = CORONA_KNOWLEDGE['admissions']
-        return f"""**Admissions Information:**
+    # Staff/Employment
+    if any(word in message for word in ['staff', 'teacher', 'employment', 'job', 'work', 'salary', 'recruit']):
+        staff = data['staff']
+        return f"""**Corona Schools Staff Information:**
 
-• Academic Year: {adm['year']}
-• Levels: {adm['levels']}
-• School Types: {', '.join(adm['types'])}
-• Programs: {', '.join(adm['programs'])}
-
-Entrance Examination Registration is ongoing. Contact the admissions office for more details."""
+• Total Staff: {staff['total']}
+• Recruitment Program: {staff['recruitment_program']}
+• Requirements: {staff['requirements']}
+• Average Salary: {staff['average_salary']}
+• Benefits: {', '.join(staff['benefits'])}"""
     
-    # Default response
-    return f"""I can help you with information about Corona Schools including:
+    # CSR
+    if any(word in message for word in ['csr', 'social responsibility', 'community', 'scholarship', 'public school']):
+        csr = data['csr']
+        return f"""**Corporate Social Responsibility:**
 
-• Leadership and school heads
-• School locations (Ikoyi, Lekki, Agbara, Gbagada)
-• Curriculum and programs
-• Admissions process
-• Co-curricular activities
-• Accreditations and awards
-• General information
+• Out-of-School Initiative: {csr['out_of_school_initiative']}
+• Public School Adoption: {csr['public_school_adoption']}
+• Scholarships: {csr['scholarships']}"""
+    
+    # Facilities
+    if any(word in message for word in ['facilities', 'infrastructure', 'building', 'library', 'lab']):
+        fac = data['facilities']
+        return f"""**Corona Schools Facilities:**
+
+**Technology:** {', '.join(fac['technology'])}
+
+**Safety & Security:** {', '.join(fac['safety'])}
+
+**Sports Facilities:** {', '.join(fac['sports'])}
+
+**Learning Spaces:** {', '.join(fac['learning'])}"""
+    
+    # Mission/Vision
+    if any(word in message for word in ['mission', 'vision', 'values', 'purpose', 'goal']):
+        return f"""**Corona Schools Mission & Vision:**
+
+**Mission:** {data['mission']}
+
+**Vision:** {data['vision']}
+
+**Core Values:** {', '.join(data['core_values'])}"""
+    
+    # About/General
+    if any(word in message for word in ['about', 'what is corona', 'tell me about']):
+        return f"""**About Corona Schools Trust Council:**
+
+Founded in {data['history']['founded']}, Corona Schools has {data['history']['current_year'] - data['history']['founded']} years of educational excellence in Nigeria.
+
+**Key Stats:**
+• {len(data['schools'])} schools across Lagos and Ogun States
+• {data['history']['total_alumni']} alumni
+• {data['history']['staff_count']} staff members
+
+**Mission:** {data['mission']}
+
+**Vision:** {data['vision']}"""
+    
+    # Default
+    return """I can help you with comprehensive information about Corona Schools including:
+
+• Leadership & Governance (2026 updates)
+• All 7 School Locations & Heads
+• Curriculum & Schemes of Work
+• Fees & Admissions
+• Co-Curricular Activities
+• Academic Calendar 2025/2026
+• Accreditations & Awards
+• Staff & Employment
+• Facilities & Infrastructure
+• CSR Initiatives
 
 What would you like to know?"""
+
 
 @app.route('/')
 def index():
@@ -234,7 +301,6 @@ def chat():
         if not user_message:
             return jsonify({'error': 'Empty message'}), 400
         
-        # Get response from knowledge base
         bot_response = generate_response(user_message)
         
         return jsonify({
