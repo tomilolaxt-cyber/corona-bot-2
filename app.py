@@ -80,7 +80,7 @@ def get_ai_response(user_message):
         })
         
         # Create the model
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Create chat session with history
         chat = model.start_chat(history=conversation_history)
