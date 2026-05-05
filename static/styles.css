@@ -361,8 +361,16 @@ body {
 }
 
 /* Creators Button */
-.creators-btn {
+.header-buttons {
     margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.creators-btn,
+.install-app-btn {
     padding: 10px 20px;
     background: rgba(255, 255, 255, 0.2);
     color: white;
@@ -374,7 +382,8 @@ body {
     transition: all 0.3s;
 }
 
-.creators-btn:hover {
+.creators-btn:hover,
+.install-app-btn:hover {
     background: white;
     color: #dc143c;
     transform: translateY(-2px);
@@ -666,5 +675,102 @@ body {
     body {
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* Install Instructions Modal */
+.install-instructions {
+    padding: 20px 0;
+}
+
+.install-option {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 12px;
+}
+
+.install-option h3 {
+    color: #dc143c;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.install-option ol {
+    margin-left: 20px;
+    line-height: 2;
+}
+
+.install-option li {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+}
+
+.install-option strong {
+    color: #dc143c;
+    font-weight: 700;
+}
+
+.ios-note {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.install-benefits {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+    color: white;
+    border-radius: 12px;
+}
+
+.install-benefits h3 {
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.install-benefits ul {
+    list-style: none;
+    padding: 0;
+}
+
+.install-benefits li {
+    padding: 8px 0;
+    font-size: 1.05em;
+}
+
+#androidInstallBtn {
+    margin-top: 15px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#androidInstallBtn:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive Install Modal */
+@media (max-width: 768px) {
+    .install-option {
+        padding: 15px;
+    }
+    
+    .install-option h3 {
+        font-size: 1.1em;
+    }
+    
+    .install-option li {
+        font-size: 1em;
     }
 }

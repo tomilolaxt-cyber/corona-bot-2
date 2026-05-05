@@ -105,11 +105,42 @@ function closeCreators() {
     modal.style.display = 'none';
 }
 
+// Install Modal Functions
+function showInstallInstructions() {
+    const modal = document.getElementById('installModal');
+    modal.style.display = 'block';
+    
+    // Detect device and show appropriate instructions
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    if (isIOS) {
+        document.getElementById('iosInstructions').style.display = 'block';
+        document.getElementById('androidInstructions').style.display = 'none';
+    } else if (isAndroid) {
+        document.getElementById('androidInstructions').style.display = 'block';
+        document.getElementById('iosInstructions').style.display = 'none';
+    } else {
+        // Show both for desktop
+        document.getElementById('androidInstructions').style.display = 'block';
+        document.getElementById('iosInstructions').style.display = 'block';
+    }
+}
+
+function closeInstallModal() {
+    const modal = document.getElementById('installModal');
+    modal.style.display = 'none';
+}
+
 // Close modal when clicking outside of it
 window.onclick = function(event) {
-    const modal = document.getElementById('creatorsModal');
-    if (event.target == modal) {
-        modal.style.display = 'none';
+    const creatorsModal = document.getElementById('creatorsModal');
+    const installModal = document.getElementById('installModal');
+    if (event.target == creatorsModal) {
+        creatorsModal.style.display = 'none';
+    }
+    if (event.target == installModal) {
+        installModal.style.display = 'none';
     }
 }
 
@@ -117,5 +148,6 @@ window.onclick = function(event) {
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeCreators();
+        closeInstallModal();
     }
 });

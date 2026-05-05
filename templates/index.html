@@ -31,7 +31,10 @@
             <div class="header-content">
                 <h1>🤖 Corona School Bot</h1>
                 <p>AI Assistant for Corona Schools Information</p>
-                <button class="creators-btn" onclick="showCreators()">👥 About the Creators</button>
+                <div class="header-buttons">
+                    <button class="creators-btn" onclick="showCreators()">👥 About the Creators</button>
+                    <button class="install-app-btn" id="installAppBtn" onclick="showInstallInstructions()">📱 Install App</button>
+                </div>
             </div>
         </header>
 
@@ -118,6 +121,49 @@
                     <p><strong>Data:</strong> Comprehensive 2026 Corona Schools institutional information</p>
                     <p><strong>Deployment:</strong> Render Cloud Platform</p>
                     <p><strong>Repository:</strong> <a href="https://github.com/tomilolaxt-cyber/corona-bot-2" target="_blank">GitHub</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Install Instructions Modal -->
+        <div id="installModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeInstallModal()">&times;</span>
+                <h2>📱 Install Corona School Bot</h2>
+                <div class="install-instructions">
+                    <div class="install-option" id="androidInstructions">
+                        <h3>🤖 For Android (Chrome)</h3>
+                        <ol>
+                            <li>Tap the <strong>menu button</strong> (three dots) in Chrome</li>
+                            <li>Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+                            <li>Tap <strong>"Install"</strong></li>
+                            <li>The app will appear on your home screen! 🎉</li>
+                        </ol>
+                        <button class="install-btn" id="androidInstallBtn" onclick="installApp()">Install Now</button>
+                    </div>
+                    
+                    <div class="install-option" id="iosInstructions">
+                        <h3>🍎 For iPhone/iPad (Safari)</h3>
+                        <ol>
+                            <li>Tap the <strong>Share button</strong> <span style="font-size: 1.5em;">⎋</span> at the bottom</li>
+                            <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                            <li>Tap <strong>"Add"</strong> in the top right</li>
+                            <li>The app will appear on your home screen! 🎉</li>
+                        </ol>
+                        <div class="ios-note">
+                            <strong>Note:</strong> This feature only works in Safari browser on iOS devices.
+                        </div>
+                    </div>
+                    
+                    <div class="install-benefits">
+                        <h3>✨ Benefits of Installing:</h3>
+                        <ul>
+                            <li>📱 Quick access from your home screen</li>
+                            <li>🚀 Faster loading times</li>
+                            <li>📴 Works offline</li>
+                            <li>🖼️ Full-screen experience</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
