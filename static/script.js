@@ -107,23 +107,33 @@ function closeCreators() {
 
 // Install Modal Functions
 function showInstallInstructions() {
+    console.log('Install button clicked!'); // Debug log
     const modal = document.getElementById('installModal');
+    
+    if (!modal) {
+        alert('Install modal not found! Please refresh the page.');
+        return;
+    }
+    
     modal.style.display = 'block';
     
     // Detect device and show appropriate instructions
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isAndroid = /Android/.test(navigator.userAgent);
     
+    const iosInstructions = document.getElementById('iosInstructions');
+    const androidInstructions = document.getElementById('androidInstructions');
+    
     if (isIOS) {
-        document.getElementById('iosInstructions').style.display = 'block';
-        document.getElementById('androidInstructions').style.display = 'none';
+        if (iosInstructions) iosInstructions.style.display = 'block';
+        if (androidInstructions) androidInstructions.style.display = 'none';
     } else if (isAndroid) {
-        document.getElementById('androidInstructions').style.display = 'block';
-        document.getElementById('iosInstructions').style.display = 'none';
+        if (androidInstructions) androidInstructions.style.display = 'block';
+        if (iosInstructions) iosInstructions.style.display = 'none';
     } else {
         // Show both for desktop
-        document.getElementById('androidInstructions').style.display = 'block';
-        document.getElementById('iosInstructions').style.display = 'block';
+        if (androidInstructions) androidInstructions.style.display = 'block';
+        if (iosInstructions) iosInstructions.style.display = 'block';
     }
 }
 
