@@ -161,3 +161,120 @@ document.addEventListener('keydown', function(event) {
         closeInstallModal();
     }
 });
+
+// OTP Login Functions
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'block';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('otpMessage').textContent = '';
+    setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+}
+
+function backToEmail() {
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('otpMessage').textContent = '';
+}
+
+async function sendOTP() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const btn = document.querySelector('#step1 .otp-btn');
+    const msg = document.getElementById('otpMessage');
+
+    if (!email || !email.includes('@')) {
+        msg.textContent = '❌ Please enter a valid email address';
+        msg.className = 'otp-error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    msg.textContent = '';
+
+    try {
+        const res = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('otpSentMsg').textContent = `✅ Code sent to ${email}! Check your inbox.`;
+            setTimeout(() => document.getElementById('otpCode').focus(), 100);
+        } else {
+            msg.textContent = '❌ ' + data.error;
+            msg.className = 'otp-error';
+        }
+    } catch (e) {
+        msg.textContent = '❌ Connection error. Please try again.';
+        msg.className = 'otp-error';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Send Code 📧';
+}
+
+async function verifyOTP() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const code = document.getElementById('otpCode').value.trim();
+    const btn = document.querySelector('#step2 .otp-btn');
+    const msg = document.getElementById('otpMessage');
+
+    if (!code || code.length !== 6) {
+        msg.textContent = '❌ Please enter the 6-digit code';
+        msg.className = 'otp-error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+
+    try {
+        const res = await fetch('/api/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            msg.textContent = '✅ ' + data.message + ' Logging you in...';
+            msg.className = 'otp-success';
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            msg.textContent = '❌ ' + data.error;
+            msg.className = 'otp-error';
+            btn.disabled = false;
+            btn.textContent = 'Verify ✅';
+        }
+    } catch (e) {
+        msg.textContent = '❌ Connection error. Please try again.';
+        msg.className = 'otp-error';
+        btn.disabled = false;
+        btn.textContent = 'Verify ✅';
+    }
+}
+
+// Allow pressing Enter to submit OTP
+document.addEventListener('DOMContentLoaded', () => {
+    const otpCode = document.getElementById('otpCode');
+    if (otpCode) {
+        otpCode.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyOTP();
+        });
+    }
+    const loginEmail = document.getElementById('loginEmail');
+    if (loginEmail) {
+        loginEmail.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendOTP();
+        });
+    }
+});

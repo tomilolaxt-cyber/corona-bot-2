@@ -2,7 +2,11 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from flask_cors import CORS
 import os
 import json
-from datetime import datetime
+import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from corona_data import CORONA_COMPREHENSIVE
 from google.oauth2 import id_token
@@ -21,6 +25,52 @@ CORS(app)
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+# Email Configuration
+MAIL_EMAIL = os.getenv('MAIL_EMAIL', 'tomilolaxt@gmail.com')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
+
+# OTP storage: {email: {code, expires_at}}
+otp_store = {}
+
+def send_otp_email(to_email, otp_code, user_name=""):
+    """Send OTP code to user's email"""
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'🔐 Your Corona School Bot Login Code: {otp_code}'
+        msg['From'] = MAIL_EMAIL
+        msg['To'] = to_email
+
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #dc143c, #8b0000); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                <h1 style="color: white; margin: 0;">🤖 Corona School Bot</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0;">Your Login Code</p>
+            </div>
+            <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 12px 12px; text-align: center;">
+                {"<p style='font-size: 1.1em;'>Hi <strong>" + user_name + "</strong>!</p>" if user_name else ""}
+                <p style="color: #555;">Your one-time login code is:</p>
+                <div style="background: white; border: 3px solid #dc143c; border-radius: 12px; padding: 20px; margin: 20px 0; display: inline-block;">
+                    <span style="font-size: 3em; font-weight: 700; letter-spacing: 10px; color: #dc143c;">{otp_code}</span>
+                </div>
+                <p style="color: #888; font-size: 0.9em;">⏰ This code expires in <strong>10 minutes</strong></p>
+                <p style="color: #888; font-size: 0.85em;">If you didn't request this, ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="color: #aaa; font-size: 0.8em;">Corona School Bot • Built by Tomilola Aboderin & Kiro AI</p>
+            </div>
+        </div>
+        """
+
+        msg.attach(MIMEText(html, 'html'))
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(MAIL_EMAIL, MAIL_PASSWORD)
+            server.sendmail(MAIL_EMAIL, to_email, msg.as_string())
+
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        return False
 
 # ============================================================
 # USER ROLE SYSTEM
@@ -514,7 +564,78 @@ def clear_chat():
 # STAFF VERIFICATION SYSTEM
 # ============================================================
 
-@app.route('/api/request-staff', methods=['POST'])
+@app.route('/api/send-otp', methods=['POST'])
+def send_otp():
+    """Send OTP to email"""
+    data = request.json
+    email = data.get('email', '').strip().lower()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'error': 'Invalid email address'})
+
+    # Generate 6-digit OTP
+    otp_code = str(random.randint(100000, 999999))
+    expires_at = datetime.now() + timedelta(minutes=10)
+
+    # Store OTP
+    otp_store[email] = {
+        'code': otp_code,
+        'expires_at': expires_at
+    }
+
+    # Send email
+    success = send_otp_email(email, otp_code)
+
+    if success:
+        return jsonify({'success': True, 'message': f'Code sent to {email}!'})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to send email. Please try again.'})
+
+@app.route('/api/verify-otp', methods=['POST'])
+def verify_otp():
+    """Verify OTP and log in user"""
+    data = request.json
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+    name = data.get('name', email.split('@')[0].title())
+
+    if email not in otp_store:
+        return jsonify({'success': False, 'error': 'No code found. Please request a new one.'})
+
+    stored = otp_store[email]
+
+    # Check expiry
+    if datetime.now() > stored['expires_at']:
+        del otp_store[email]
+        return jsonify({'success': False, 'error': 'Code expired. Please request a new one.'})
+
+    # Check code
+    if code != stored['code']:
+        return jsonify({'success': False, 'error': 'Wrong code. Please try again.'})
+
+    # Code is correct - log in!
+    del otp_store[email]
+
+    user_id = f"email_{email.replace('@', '_').replace('.', '_')}"
+    role = get_user_role(email, user_id)
+
+    session.permanent = True
+    session['user'] = {
+        'id': user_id,
+        'name': name,
+        'email': email,
+        'picture': f'https://ui-avatars.com/api/?name={name}&background=dc143c&color=fff',
+        'role': role
+    }
+
+    if user_id not in chat_histories:
+        chat_histories[user_id] = []
+
+    return jsonify({
+        'success': True,
+        'message': f'Welcome, {name}!',
+        'role': role
+    })
 def request_staff():
     """User requests staff verification"""
     user = session.get('user')

@@ -835,3 +835,58 @@ body {
     background: white;
     color: #dc143c;
 }
+
+/* OTP Login */
+.otp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.otp-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.otp-input:focus {
+    outline: none;
+    border-color: #dc143c;
+}
+
+.otp-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #dc143c, #8b0000);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.otp-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+}
+
+.otp-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.otp-note {
+    text-align: center;
+    color: #999;
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+.otp-success { color: #4caf50; }
+.otp-error { color: #f44336; }

@@ -37,9 +37,9 @@
                     
                     <!-- User Profile / Login -->
                     <div id="userSection">
-                        <a href="/login" class="login-btn">
+                        <a href="#" class="login-btn" onclick="showLoginModal(); return false;">
                             <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; margin-right: 5px; vertical-align: middle;">
-                            Sign in with Google
+                            Sign In
                         </a>
                     </div>
                     
@@ -105,6 +105,36 @@
                 </div>
             </aside>
         </main>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content" style="max-width: 420px;">
+                <span class="close" onclick="closeLoginModal()">&times;</span>
+                <h2>🔐 Sign In</h2>
+                <p style="color: #666; margin-bottom: 20px; text-align: center;">Enter your email to receive a login code</p>
+
+                <!-- Step 1: Email -->
+                <div id="step1">
+                    <div class="otp-form">
+                        <input type="email" id="loginEmail" class="otp-input" placeholder="Enter your email address" />
+                        <button class="otp-btn" onclick="sendOTP()">Send Code 📧</button>
+                    </div>
+                    <p class="otp-note">Works with Gmail, Outlook, @coronaschool.org and any email!</p>
+                </div>
+
+                <!-- Step 2: OTP Code -->
+                <div id="step2" style="display: none;">
+                    <p style="text-align: center; color: #555;" id="otpSentMsg"></p>
+                    <div class="otp-form">
+                        <input type="text" id="otpCode" class="otp-input" placeholder="Enter 6-digit code" maxlength="6" style="letter-spacing: 8px; font-size: 1.5em; text-align: center;" />
+                        <button class="otp-btn" onclick="verifyOTP()">Verify ✅</button>
+                    </div>
+                    <button onclick="backToEmail()" style="background: none; border: none; color: #dc143c; cursor: pointer; margin-top: 10px; text-decoration: underline;">← Use different email</button>
+                </div>
+
+                <div id="otpMessage" style="margin-top: 15px; text-align: center; font-weight: 600;"></div>
+            </div>
+        </div>
 
         <!-- Creators Modal -->
         <div id="creatorsModal" class="modal">
