@@ -8,303 +8,1120 @@
     <meta name="apple-mobile-web-app-title" content="Corona Bot">
     <meta name="theme-color" content="#dc143c">
     <meta name="description" content="AI Assistant for Corona Schools - Get instant answers about admissions, curriculum, facilities, and more">
-    
     <title>Corona School Bot - AI Assistant</title>
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    
-    <!-- iOS Icons -->
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.svg') }}">
     <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='icon-192.svg') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icon-192.svg') }}">
     <link rel="apple-touch-icon" sizes="167x167" href="{{ url_for('static', filename='icon-192.svg') }}">
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon-192.svg') }}">
-    
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+
+/* ===== GEMINI-STYLE LAYOUT ===== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --red: #dc143c;
+  --red-dark: #8b0000;
+  --red-mid: #b01030;
+  --sidebar-bg: #1a1a2e;
+  --sidebar-hover: #16213e;
+  --sidebar-active: #0f3460;
+  --sidebar-text: #e0e0e0;
+  --sidebar-muted: #888;
+  --chat-bg: #f8f9fa;
+  --white: #ffffff;
+  --border: #e0e0e0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --user-bubble: linear-gradient(135deg, #dc143c, #8b0000);
+  --bot-bubble: #f0f0f0;
+}
+html, body { height:100%; overflow:hidden; }
+body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--chat-bg); color:#333; display:flex; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width:280px; min-width:280px; height:100vh;
+  background:var(--sidebar-bg); color:var(--sidebar-text);
+  display:flex; flex-direction:column;
+  transition:transform 0.3s ease; z-index:100;
+  overflow:hidden;
+}
+.sidebar-header {
+  padding:20px 16px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.sidebar-logo {
+  display:flex; align-items:center; gap:10px; margin-bottom:16px;
+}
+.sidebar-logo .logo-icon {
+  width:40px; height:40px; border-radius:10px;
+  background:linear-gradient(135deg,var(--red),var(--red-dark));
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4em; flex-shrink:0;
+}
+.sidebar-logo .logo-text { font-size:0.95em; font-weight:700; line-height:1.2; }
+.sidebar-logo .logo-sub { font-size:0.72em; color:var(--sidebar-muted); font-weight:400; }
+.new-chat-btn {
+  width:100%; padding:10px 14px;
+  background:rgba(220,20,60,0.15); color:var(--red);
+  border:1px solid rgba(220,20,60,0.3); border-radius:8px;
+  cursor:pointer; font-size:0.9em; font-weight:600;
+  display:flex; align-items:center; gap:8px;
+  transition:all 0.2s;
+}
+.new-chat-btn:hover { background:rgba(220,20,60,0.25); border-color:var(--red); }
+.new-chat-btn .plus { font-size:1.2em; }
+
+/* Sidebar History */
+.sidebar-history {
+  flex:1; overflow-y:auto; padding:12px 8px;
+}
+.sidebar-history::-webkit-scrollbar { width:4px; }
+.sidebar-history::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.history-label {
+  font-size:0.72em; font-weight:600; color:var(--sidebar-muted);
+  text-transform:uppercase; letter-spacing:0.08em;
+  padding:8px 8px 4px;
+}
+.history-item {
+  padding:9px 10px; border-radius:8px; cursor:pointer;
+  font-size:0.85em; color:var(--sidebar-text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:background 0.15s; margin-bottom:2px;
+  display:flex; align-items:center; gap:8px;
+}
+.history-item:hover { background:var(--sidebar-hover); }
+.history-item.active { background:var(--sidebar-active); }
+.history-item .hi-icon { font-size:0.9em; flex-shrink:0; opacity:0.7; }
+.history-empty {
+  padding:20px 10px; text-align:center;
+  color:var(--sidebar-muted); font-size:0.82em; line-height:1.6;
+}
+
+/* Admin link */
+.admin-link {
+  display:flex; align-items:center; gap:8px;
+  padding:9px 10px; border-radius:8px; cursor:pointer;
+  font-size:0.85em; color:#ffd700;
+  text-decoration:none; transition:background 0.15s;
+  margin:4px 8px;
+}
+.admin-link:hover { background:rgba(255,215,0,0.1); }
+
+/* Sidebar Footer - User Profile */
+.sidebar-footer {
+  padding:12px 16px; border-top:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.user-profile-sidebar {
+  display:flex; align-items:center; gap:10px;
+  padding:8px; border-radius:8px;
+  transition:background 0.15s; cursor:default;
+}
+.user-profile-sidebar:hover { background:rgba(255,255,255,0.05); }
+.user-avatar-sidebar {
+  width:36px; height:36px; border-radius:50%;
+  border:2px solid rgba(220,20,60,0.5); flex-shrink:0;
+  object-fit:cover;
+}
+.user-info-sidebar { flex:1; min-width:0; }
+.user-name-sidebar { font-size:0.85em; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-email-sidebar { font-size:0.72em; color:var(--sidebar-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.role-badge {
+  font-size:0.68em; font-weight:700; padding:2px 7px; border-radius:10px;
+  white-space:nowrap; margin-top:2px; display:inline-block;
+}
+.role-owner { background:rgba(255,215,0,0.2); color:#ffd700; border:1px solid rgba(255,215,0,0.3); }
+.role-staff { background:rgba(76,175,80,0.2); color:#81c784; border:1px solid rgba(76,175,80,0.3); }
+.role-pending { background:rgba(255,152,0,0.2); color:#ffb74d; border:1px solid rgba(255,152,0,0.3); }
+.role-user { background:rgba(33,150,243,0.2); color:#64b5f6; border:1px solid rgba(33,150,243,0.3); }
+.sidebar-signin-btn {
+  width:100%; padding:10px; background:linear-gradient(135deg,var(--red),var(--red-dark));
+  color:white; border:none; border-radius:8px; cursor:pointer;
+  font-size:0.88em; font-weight:600; transition:opacity 0.2s;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.sidebar-signin-btn:hover { opacity:0.9; }
+.sidebar-logout-btn {
+  background:none; border:none; color:var(--sidebar-muted);
+  cursor:pointer; font-size:0.75em; padding:4px 8px;
+  border-radius:4px; transition:color 0.2s;
+}
+.sidebar-logout-btn:hover { color:var(--red); }
+
+/* ===== MAIN AREA ===== */
+.main-area {
+  flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden;
+  background:var(--white);
+}
+
+/* Header */
+.top-header {
+  height:56px; padding:0 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border); background:var(--white);
+  flex-shrink:0; z-index:10;
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.hamburger-btn {
+  display:none; background:none; border:none; cursor:pointer;
+  padding:6px; border-radius:6px; color:#555;
+  font-size:1.3em; transition:background 0.2s;
+}
+.hamburger-btn:hover { background:#f0f0f0; }
+.header-title { font-size:1.05em; font-weight:700; color:#333; }
+.header-right { display:flex; align-items:center; gap:8px; }
+.header-btn {
+  padding:7px 14px; border-radius:8px; cursor:pointer;
+  font-size:0.82em; font-weight:600; transition:all 0.2s;
+  border:1px solid var(--border); background:var(--white); color:#555;
+  display:flex; align-items:center; gap:5px;
+}
+.header-btn:hover { background:#f5f5f5; border-color:#ccc; }
+.header-btn.primary { background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; border-color:transparent; }
+.header-btn.primary:hover { opacity:0.9; }
+
+/* Chat Area */
+.chat-area {
+  flex:1; overflow-y:auto; padding:20px 20px 0;
+  display:flex; flex-direction:column;
+}
+.chat-area::-webkit-scrollbar { width:6px; }
+.chat-area::-webkit-scrollbar-thumb { background:#ddd; border-radius:3px; }
+.chat-area::-webkit-scrollbar-thumb:hover { background:#bbb; }
+
+/* Welcome Screen */
+.welcome-screen {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:40px 20px; text-align:center;
+}
+.welcome-logo { font-size:4em; margin-bottom:16px; }
+.welcome-title { font-size:1.8em; font-weight:700; color:#333; margin-bottom:8px; }
+.welcome-sub { color:#777; font-size:1em; margin-bottom:32px; max-width:480px; line-height:1.6; }
+.quick-btns { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-width:600px; }
+.quick-btn {
+  padding:10px 16px; border-radius:20px; cursor:pointer;
+  font-size:0.85em; font-weight:500; transition:all 0.2s;
+  border:1px solid var(--border); background:var(--white); color:#444;
+  white-space:nowrap;
+}
+.quick-btn:hover { background:var(--red); color:white; border-color:var(--red); transform:translateY(-1px); }
+
+/* Messages */
+.messages-container { display:flex; flex-direction:column; gap:16px; padding-bottom:20px; }
+.msg-row { display:flex; animation:msgIn 0.25s ease-out; }
+@keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.msg-row.user { justify-content:flex-end; }
+.msg-row.bot { justify-content:flex-start; }
+.msg-avatar {
+  width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1em; margin-top:2px;
+}
+.msg-row.bot .msg-avatar { background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; margin-right:10px; }
+.msg-row.user .msg-avatar { background:#e8e8e8; margin-left:10px; order:2; }
+.msg-bubble {
+  max-width:68%; padding:12px 16px; border-radius:18px;
+  line-height:1.6; font-size:0.93em; word-wrap:break-word;
+}
+.msg-row.user .msg-bubble {
+  background:var(--user-bubble); color:white;
+  border-radius:18px 18px 4px 18px;
+  box-shadow:0 2px 8px rgba(220,20,60,0.25);
+}
+.msg-row.bot .msg-bubble {
+  background:var(--bot-bubble); color:#333;
+  border-radius:18px 18px 18px 4px;
+}
+.msg-bubble strong { font-weight:700; }
+.msg-bubble ul { margin:8px 0 0 18px; }
+.msg-bubble li { margin:4px 0; }
+.msg-time { font-size:0.7em; opacity:0.6; margin-top:4px; text-align:right; }
+.msg-row.bot .msg-time { text-align:left; }
+
+/* Typing indicator */
+.typing-indicator { display:flex; align-items:center; gap:10px; padding:8px 0; }
+.typing-dots { display:flex; gap:4px; padding:12px 16px; background:var(--bot-bubble); border-radius:18px 18px 18px 4px; }
+.typing-dot {
+  width:8px; height:8px; border-radius:50%; background:#aaa;
+  animation:typingBounce 1.4s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay:0.2s; }
+.typing-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes typingBounce {
+  0%,80%,100% { transform:translateY(0); opacity:0.4; }
+  40% { transform:translateY(-8px); opacity:1; }
+}
+
+/* Input Bar */
+.input-bar {
+  padding:16px 20px; border-top:1px solid var(--border);
+  background:var(--white); flex-shrink:0;
+}
+.input-form { display:flex; gap:10px; align-items:flex-end; }
+.input-wrapper {
+  flex:1; display:flex; align-items:center;
+  border:2px solid var(--border); border-radius:24px;
+  background:var(--white); transition:border-color 0.2s;
+  padding:0 16px;
+}
+.input-wrapper:focus-within { border-color:var(--red); }
+.chat-input {
+  flex:1; border:none; outline:none; padding:12px 0;
+  font-size:0.95em; background:transparent; resize:none;
+  font-family:inherit; max-height:120px; overflow-y:auto;
+}
+.send-btn {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,var(--red),var(--red-dark));
+  color:white; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1em; transition:all 0.2s; flex-shrink:0;
+}
+.send-btn:hover { transform:scale(1.05); box-shadow:0 4px 12px rgba(220,20,60,0.35); }
+.send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.input-hint { font-size:0.72em; color:#aaa; text-align:center; margin-top:6px; }
+
+/* ===== MODALS ===== */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.55); animation:fadeIn 0.2s;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal-box {
+  background:white; border-radius:16px; padding:32px;
+  width:90%; max-width:480px; max-height:90vh; overflow-y:auto;
+  box-shadow:0 8px 40px rgba(0,0,0,0.25);
+  animation:slideDown 0.25s ease-out; position:relative;
+}
+.modal-box.wide { max-width:760px; }
+@keyframes slideDown { from{transform:translateY(-30px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-close {
+  position:absolute; top:16px; right:16px;
+  background:none; border:none; font-size:1.5em; cursor:pointer;
+  color:#aaa; line-height:1; transition:color 0.2s;
+}
+.modal-close:hover { color:var(--red); }
+.modal-title { font-size:1.4em; font-weight:700; color:var(--red); text-align:center; margin-bottom:6px; }
+.modal-sub { color:#777; text-align:center; font-size:0.9em; margin-bottom:24px; }
+
+/* Login Modal */
+.otp-input-field {
+  width:100%; padding:13px 16px; border:2px solid var(--border);
+  border-radius:10px; font-size:1em; transition:border-color 0.2s;
+  font-family:inherit;
+}
+.otp-input-field:focus { outline:none; border-color:var(--red); }
+.otp-input-field.code-field { letter-spacing:10px; font-size:1.6em; text-align:center; font-weight:700; }
+.otp-submit-btn {
+  width:100%; padding:13px; margin-top:12px;
+  background:linear-gradient(135deg,var(--red),var(--red-dark));
+  color:white; border:none; border-radius:10px;
+  font-size:1em; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+}
+.otp-submit-btn:hover { opacity:0.9; }
+.otp-submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
+.otp-note { text-align:center; color:#aaa; font-size:0.8em; margin-top:10px; }
+.otp-msg { margin-top:14px; text-align:center; font-weight:600; font-size:0.9em; }
+.otp-msg.success { color:#4caf50; }
+.otp-msg.error { color:#f44336; }
+.back-link { background:none; border:none; color:var(--red); cursor:pointer; font-size:0.85em; text-decoration:underline; margin-top:10px; display:block; text-align:center; }
+
+/* Creators Modal */
+.creators-grid { display:flex; gap:20px; margin-bottom:24px; }
+.creator-card {
+  flex:1; text-align:center; padding:20px 16px;
+  background:#f8f8f8; border-radius:12px; transition:transform 0.2s;
+}
+.creator-card:hover { transform:translateY(-4px); box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+.creator-emoji { font-size:3em; margin-bottom:12px; }
+.creator-name { font-size:1.1em; font-weight:700; color:var(--red); margin-bottom:4px; }
+.creator-role-text { color:#667eea; font-weight:600; font-size:0.88em; margin-bottom:10px; }
+.creator-desc { color:#666; font-size:0.83em; line-height:1.6; margin-bottom:8px; }
+.creator-contact { color:#999; font-size:0.8em; }
+.creator-divider { display:flex; align-items:center; justify-content:center; font-size:2em; color:var(--red); padding:0 4px; }
+.project-info-box {
+  background:linear-gradient(135deg,var(--red),var(--red-dark));
+  color:white; padding:20px; border-radius:12px;
+}
+.project-info-box h3 { margin-bottom:12px; font-size:1.1em; }
+.project-info-box p { margin-bottom:8px; font-size:0.88em; line-height:1.6; }
+.project-info-box a { color:white; text-decoration:underline; }
+.project-info-box a:hover { color:#ffeb3b; }
+
+/* Install Modal */
+.install-section { margin-bottom:20px; padding:18px; background:#f8f8f8; border-radius:10px; }
+.install-section h3 { color:var(--red); margin-bottom:12px; font-size:1.05em; }
+.install-section ol { margin-left:18px; line-height:2; font-size:0.9em; }
+.install-section strong { color:var(--red); }
+.ios-note-box { margin-top:12px; padding:12px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:4px; font-size:0.85em; }
+.install-benefits-box { background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; padding:18px; border-radius:10px; }
+.install-benefits-box h3 { margin-bottom:10px; }
+.install-benefits-box ul { list-style:none; }
+.install-benefits-box li { padding:5px 0; font-size:0.9em; }
+.install-now-btn { margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:transform 0.2s; }
+.install-now-btn:hover { transform:scale(1.03); }
+
+/* PWA Install Banner */
+.install-banner {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  background:white; border-radius:14px; padding:14px 18px;
+  box-shadow:0 6px 30px rgba(0,0,0,0.2); display:none;
+  align-items:center; gap:14px; z-index:2000; max-width:92vw;
+  animation:slideUp 0.4s ease-out;
+}
+@keyframes slideUp { from{bottom:-80px;opacity:0} to{bottom:20px;opacity:1} }
+.install-banner.show { display:flex; }
+.banner-icon { font-size:2.2em; }
+.banner-text strong { display:block; color:var(--red); font-size:0.95em; }
+.banner-text p { margin:0; color:#666; font-size:0.8em; }
+.banner-install-btn { padding:8px 16px; background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; white-space:nowrap; font-size:0.85em; }
+.banner-close-btn { background:none; border:none; color:#aaa; cursor:pointer; font-size:1.3em; padding:4px; }
+.banner-close-btn:hover { color:var(--red); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:768px) {
+  .sidebar {
+    position:fixed; left:0; top:0; height:100vh;
+    transform:translateX(-100%); z-index:200;
+    box-shadow:4px 0 20px rgba(0,0,0,0.3);
+  }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4);
+    z-index:199;
+  }
+  .sidebar-overlay.show { display:block; }
+  .hamburger-btn { display:flex; }
+  .main-area { width:100%; }
+  .msg-bubble { max-width:85%; }
+  .creators-grid { flex-direction:column; }
+  .creator-divider { transform:rotate(90deg); }
+  .welcome-title { font-size:1.4em; }
+  .quick-btns { gap:8px; }
+  .quick-btn { font-size:0.8em; padding:8px 12px; }
+}
+@media (max-width:480px) {
+  .top-header { padding:0 12px; }
+  .chat-area { padding:12px 12px 0; }
+  .input-bar { padding:12px; }
+  .header-btn span { display:none; }
+  .modal-box { padding:20px; }
+}
+
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <h1>🤖 Corona School Bot</h1>
-                <p>AI Assistant for Corona Schools Information</p>
-                <div class="header-buttons">
-                    <button class="creators-btn" onclick="showCreators()">👥 About the Creators</button>
-                    <button class="install-app-btn" id="installAppBtn" onclick="showInstallInstructions()">📱 Install App</button>
-                    
-                    <!-- User Profile / Login -->
-                    <div id="userSection">
-                        <a href="#" class="login-btn" onclick="showLoginModal(); return false;">
-                            <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; margin-right: 5px; vertical-align: middle;">
-                            Sign In
-                        </a>
-                    </div>
-                    
-                    <div id="userProfile" style="display: none;">
-                        <img id="userPicture" class="user-avatar" alt="User">
-                        <span id="userName" class="user-name"></span>
-                        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </header>
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        <main class="main-content">
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message bot-message">
-                        <div class="message-content">
-                            <p id="welcomeMessage">Hello! Welcome to Corona School Bot. I have comprehensive information about all Corona Schools campuses. Sign in for a personalized experience! What would you like to know?</p>
-                        </div>
-                    </div>
-                </div>
+<!-- ===== LEFT SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">&#x1F916;</div>
+      <div>
+        <div class="logo-text">Corona School Bot</div>
+        <div class="logo-sub">AI Assistant</div>
+      </div>
+    </div>
+    <button class="new-chat-btn" onclick="newChat()">
+      <span class="plus">&#x2B;</span> New Chat
+    </button>
+  </div>
 
-                <div class="chat-input-area">
-                    <form id="chatForm" class="chat-form">
-                        <input 
-                            type="text" 
-                            id="userInput" 
-                            class="chat-input" 
-                            placeholder="Ask me anything about Corona Schools..." 
-                            autocomplete="off"
-                        >
-                        <button type="submit" class="send-btn">Send</button>
-                    </form>
-                    <div class="loading" id="loading" style="display: none;">
-                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                    </div>
-                </div>
-            </div>
+  <div class="sidebar-history" id="sidebarHistory">
+    <div class="history-label">Recent Chats</div>
+    <div class="history-empty" id="historyEmpty">
+      &#x1F4AC; Your conversations will appear here after you sign in.
+    </div>
+    <div id="historyList"></div>
+  </div>
 
-            <aside class="sidebar">
-                <div class="quick-links">
-                    <h3>Quick Questions</h3>
-                    <button class="quick-link-btn" onclick="askQuestion('Tell me about Corona Schools')">About Corona Schools</button>
-                    <button class="quick-link-btn" onclick="askQuestion('What are the admission requirements and process?')">Admissions</button>
-                    <button class="quick-link-btn" onclick="askQuestion('What curriculum and programs do you offer?')">Curriculum</button>
-                    <button class="quick-link-btn" onclick="askQuestion('What co-curricular activities are available?')">Activities</button>
-                    <button class="quick-link-btn" onclick="askQuestion('Tell me about the facilities and infrastructure')">Facilities</button>
-                    <button class="quick-link-btn" onclick="askQuestion('What accreditations does Corona Schools have?')">Accreditations</button>
-                </div>
+  <!-- Admin Panel link (owner only) -->
+  <div id="adminLinkWrap" style="display:none;">
+    <a href="/admin" class="admin-link">&#x1F451; Admin Panel</a>
+  </div>
 
-                <div class="info-box">
-                    <h3>📊 Corona Schools Stats</h3>
-                    <ul>
-                        <li><strong>70 Years</strong> of excellence</li>
-                        <li><strong>8 Schools</strong> across Nigeria</li>
-                        <li><strong>35,000+</strong> students</li>
-                        <li><strong>668</strong> staff members</li>
-                    </ul>
-                </div>
-
-                <div class="action-box">
-                    <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
-                </div>
-            </aside>
-        </main>
-
-        <!-- Login Modal -->
-        <div id="loginModal" class="modal">
-            <div class="modal-content" style="max-width: 420px;">
-                <span class="close" onclick="closeLoginModal()">&times;</span>
-                <h2>🔐 Sign In</h2>
-                <p style="color: #666; margin-bottom: 20px; text-align: center;">Enter your email to receive a login code</p>
-
-                <!-- Step 1: Email -->
-                <div id="step1">
-                    <div class="otp-form">
-                        <input type="email" id="loginEmail" class="otp-input" placeholder="Enter your email address" />
-                        <button class="otp-btn" onclick="sendOTP()">Send Code 📧</button>
-                    </div>
-                    <p class="otp-note">Works with Gmail, Outlook, @coronaschool.org and any email!</p>
-                </div>
-
-                <!-- Step 2: OTP Code -->
-                <div id="step2" style="display: none;">
-                    <p style="text-align: center; color: #555;" id="otpSentMsg"></p>
-                    <div class="otp-form">
-                        <input type="text" id="otpCode" class="otp-input" placeholder="Enter 6-digit code" maxlength="6" style="letter-spacing: 8px; font-size: 1.5em; text-align: center;" />
-                        <button class="otp-btn" onclick="verifyOTP()">Verify ✅</button>
-                    </div>
-                    <button onclick="backToEmail()" style="background: none; border: none; color: #dc143c; cursor: pointer; margin-top: 10px; text-decoration: underline;">← Use different email</button>
-                </div>
-
-                <div id="otpMessage" style="margin-top: 15px; text-align: center; font-weight: 600;"></div>
-            </div>
+  <div class="sidebar-footer">
+    <!-- Logged out state -->
+    <div id="sidebarSignIn">
+      <button class="sidebar-signin-btn" onclick="showLoginModal()">
+        &#x1F510; Sign In
+      </button>
+    </div>
+    <!-- Logged in state -->
+    <div id="sidebarUserProfile" style="display:none;">
+      <div class="user-profile-sidebar">
+        <img id="sidebarUserPic" class="user-avatar-sidebar" src="" alt="User">
+        <div class="user-info-sidebar">
+          <div class="user-name-sidebar" id="sidebarUserName"></div>
+          <div class="user-email-sidebar" id="sidebarUserEmail"></div>
+          <span class="role-badge" id="sidebarRoleBadge"></span>
         </div>
+        <button class="sidebar-logout-btn" onclick="window.location.href='/logout'" title="Sign out">&#x2715;</button>
+      </div>
+    </div>
+  </div>
+</aside>
 
-        <!-- Creators Modal -->
-        <div id="creatorsModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeCreators()">&times;</span>
-                <h2>👥 About the Creators</h2>
-                <div class="creators-info">
-                    <div class="creator">
-                        <div class="creator-icon">👨‍💻</div>
-                        <h3>Tomilola Aboderin</h3>
-                        <p class="creator-role">Project Lead & Developer</p>
-                        <p class="creator-desc">Conceptualized and built the Corona School Bot. Gathered comprehensive Corona Schools data, managed the project, and deployed the AI assistant.</p>
-                        <p class="creator-email">📧 tomilolaxt@gmail.com</p>
-                    </div>
-                    <div class="creator-divider">🤝</div>
-                    <div class="creator">
-                        <div class="creator-icon">🤖</div>
-                        <h3>Kiro AI</h3>
-                        <p class="creator-role">AI Development Assistant</p>
-                        <p class="creator-desc">Powered by Claude Sonnet 4.5. Provided coding assistance, structured the knowledge base, and helped implement the technical architecture.</p>
-                        <p class="creator-tech">⚡ AI-Powered Development Tool</p>
-                    </div>
-                </div>
-                <div class="project-info">
-                    <h3>🎓 Project Information</h3>
-                    <p><strong>Purpose:</strong> AI-powered information assistant for Corona Schools Trust Council</p>
-                    <p><strong>Technology:</strong> Flask (Python), HTML5, CSS3, JavaScript</p>
-                    <p><strong>Data:</strong> Comprehensive 2026 Corona Schools institutional information</p>
-                    <p><strong>Deployment:</strong> Render Cloud Platform</p>
-                    <p><strong>Repository:</strong> <a href="https://github.com/tomilolaxt-cyber/corona-bot-2" target="_blank">GitHub</a></p>
-                </div>
-            </div>
-        </div>
+<!-- ===== MAIN AREA ===== -->
+<div class="main-area">
 
-        <!-- Install Instructions Modal -->
-        <div id="installModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeInstallModal()">&times;</span>
-                <h2>📱 Install Corona School Bot</h2>
-                <div class="install-instructions">
-                    <div class="install-option" id="androidInstructions">
-                        <h3>🤖 For Android (Chrome)</h3>
-                        <ol>
-                            <li>Tap the <strong>menu button</strong> (three dots) in Chrome</li>
-                            <li>Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
-                            <li>Tap <strong>"Install"</strong></li>
-                            <li>The app will appear on your home screen! 🎉</li>
-                        </ol>
-                        <button class="install-btn" id="androidInstallBtn" onclick="installApp()">Install Now</button>
-                    </div>
-                    
-                    <div class="install-option" id="iosInstructions">
-                        <h3>🍎 For iPhone/iPad (Safari)</h3>
-                        <ol>
-                            <li>Tap the <strong>Share button</strong> <span style="font-size: 1.5em;">⎋</span> at the bottom</li>
-                            <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-                            <li>Tap <strong>"Add"</strong> in the top right</li>
-                            <li>The app will appear on your home screen! 🎉</li>
-                        </ol>
-                        <div class="ios-note">
-                            <strong>Note:</strong> This feature only works in Safari browser on iOS devices.
-                        </div>
-                    </div>
-                    
-                    <div class="install-benefits">
-                        <h3>✨ Benefits of Installing:</h3>
-                        <ul>
-                            <li>📱 Quick access from your home screen</li>
-                            <li>🚀 Faster loading times</li>
-                            <li>📴 Works offline</li>
-                            <li>🖼️ Full-screen experience</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="header-left">
+      <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">&#x2630;</button>
+      <span class="header-title">&#x1F916; Corona School Bot</span>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="showCreators()">
+        <span>&#x1F465;</span><span> About Creators</span>
+      </button>
+      <button class="header-btn primary" onclick="showInstallInstructions()" id="installAppBtn">
+        <span>&#x1F4F1;</span><span> Install App</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Chat Area -->
+  <div class="chat-area" id="chatArea">
+
+    <!-- Welcome Screen (shown when no messages) -->
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-logo">&#x1F916;</div>
+      <h1 class="welcome-title">Corona School Bot</h1>
+      <p class="welcome-sub" id="welcomeMsg">
+        Hello! I have comprehensive information about all Corona Schools campuses.
+        Sign in for a personalized experience. What would you like to know?
+      </p>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="askQuestion('Tell me about Corona Schools')">&#x1F3EB; About Corona Schools</button>
+        <button class="quick-btn" onclick="askQuestion('What are the admission requirements and process?')">&#x1F4CB; Admissions</button>
+        <button class="quick-btn" onclick="askQuestion('What curriculum and programs do you offer?')">&#x1F4DA; Curriculum</button>
+        <button class="quick-btn" onclick="askQuestion('What co-curricular activities are available?')">&#x26BD; Activities</button>
+        <button class="quick-btn" onclick="askQuestion('Tell me about the facilities and infrastructure')">&#x1F3D7; Facilities</button>
+        <button class="quick-btn" onclick="askQuestion('What accreditations does Corona Schools have?')">&#x1F3C6; Accreditations</button>
+        <button class="quick-btn" onclick="askQuestion('What are the school fees for 2024/2025?')">&#x1F4B0; School Fees</button>
+        <button class="quick-btn" onclick="askQuestion('Who leads Corona Schools?')">&#x1F468;&#x200D;&#x1F4BC; Leadership</button>
+      </div>
     </div>
 
-    <!-- Install App Prompt -->
-    <div id="installPrompt" class="install-prompt" style="display: none;">
-        <div class="install-content">
-            <span class="install-icon">📱</span>
-            <div class="install-text">
-                <strong>Install Corona School Bot</strong>
-                <p>Add to your home screen for quick access!</p>
-            </div>
-            <button class="install-btn" onclick="installApp()">Install</button>
-            <button class="install-close" onclick="closeInstallPrompt()">✕</button>
-        </div>
+    <!-- Messages Container (hidden initially) -->
+    <div class="messages-container" id="messagesContainer" style="display:none;"></div>
+
+  </div>
+
+  <!-- Input Bar -->
+  <div class="input-bar">
+    <form class="input-form" id="chatForm" onsubmit="sendMessage(event)">
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          class="chat-input"
+          placeholder="Ask me anything about Corona Schools..."
+          rows="1"
+          autocomplete="off"
+          onkeydown="handleInputKey(event)"
+        ></textarea>
+      </div>
+      <button type="submit" class="send-btn" id="sendBtn" title="Send">&#x27A4;</button>
+    </form>
+    <div class="input-hint">Press Enter to send &bull; Shift+Enter for new line</div>
+  </div>
+
+</div><!-- end .main-area -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal" onclick="handleModalClick(event,'loginModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLoginModal()">&#x2715;</button>
+    <div class="modal-title">&#x1F510; Sign In</div>
+    <div class="modal-sub">Enter your email to receive a one-time login code</div>
+
+    <div id="otpStep1">
+      <input type="email" id="loginEmail" class="otp-input-field" placeholder="Enter your email address" autocomplete="email">
+      <button class="otp-submit-btn" onclick="sendOTP()">Send Code &#x1F4E7;</button>
+      <p class="otp-note">Works with Gmail, Outlook, @coronaschool.org and any email!</p>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    
-    <!-- PWA Service Worker Registration -->
-    <script>
-        // Check if user is logged in
-        fetch('/api/user')
-            .then(response => response.json())
-            .then(data => {
-                if (data.authenticated) {
-                    document.getElementById('userSection').style.display = 'none';
-                    document.getElementById('userProfile').style.display = 'flex';
-                    document.getElementById('userName').textContent = data.name;
-                    document.getElementById('userPicture').src = data.picture;
-                    // Set personalized greeting
-                    fetch('/api/greeting')
-                        .then(r => r.json())
-                        .then(g => {
-                            document.getElementById('welcomeMessage').textContent = g.greeting;
-                        });
-                }
-            });
-        
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then((registration) => {
-                        console.log('ServiceWorker registered:', registration);
-                    })
-                    .catch((error) => {
-                        console.log('ServiceWorker registration failed:', error);
-                    });
-            });
-        }
+    <div id="otpStep2" style="display:none;">
+      <p style="text-align:center;color:#555;margin-bottom:16px;" id="otpSentMsg"></p>
+      <input type="text" id="otpCode" class="otp-input-field code-field" placeholder="000000" maxlength="6" autocomplete="one-time-code">
+      <button class="otp-submit-btn" onclick="verifyOTP()">Verify &#x2705;</button>
+      <button class="back-link" onclick="backToEmail()">&#x2190; Use a different email</button>
+    </div>
 
-        // PWA Install Prompt
-        let deferredPrompt;
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install prompt after 3 seconds
-            setTimeout(() => {
-                document.getElementById('installPrompt').style.display = 'block';
-            }, 3000);
-        });
+    <div class="otp-msg" id="otpMessage"></div>
+  </div>
+</div>
 
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
-                    deferredPrompt = null;
-                    document.getElementById('installPrompt').style.display = 'none';
-                });
-            }
-        }
+<!-- Creators Modal -->
+<div class="modal-overlay" id="creatorsModal" onclick="handleModalClick(event,'creatorsModal')">
+  <div class="modal-box wide">
+    <button class="modal-close" onclick="closeCreators()">&#x2715;</button>
+    <div class="modal-title">&#x1F465; About the Creators</div>
+    <div class="creators-grid">
+      <div class="creator-card">
+        <div class="creator-emoji">&#x1F468;&#x200D;&#x1F4BB;</div>
+        <div class="creator-name">Tomilola Aboderin</div>
+        <div class="creator-role-text">Project Lead &amp; Developer</div>
+        <div class="creator-desc">Conceptualized and built the Corona School Bot. Gathered comprehensive Corona Schools data, managed the project, and deployed the AI assistant.</div>
+        <div class="creator-contact">&#x1F4E7; tomilolaxt@gmail.com</div>
+      </div>
+      <div class="creator-divider">&#x1F91D;</div>
+      <div class="creator-card">
+        <div class="creator-emoji">&#x1F916;</div>
+        <div class="creator-name">Kiro AI</div>
+        <div class="creator-role-text">AI Development Assistant</div>
+        <div class="creator-desc">Powered by Claude Sonnet 4.5. Provided coding assistance, structured the knowledge base, and helped implement the technical architecture.</div>
+        <div class="creator-contact">&#x26A1; AI-Powered Development Tool</div>
+      </div>
+    </div>
+    <div class="project-info-box">
+      <h3>&#x1F393; Project Information</h3>
+      <p><strong>Purpose:</strong> AI-powered information assistant for Corona Schools Trust Council</p>
+      <p><strong>Technology:</strong> Flask (Python), HTML5, CSS3, JavaScript</p>
+      <p><strong>Data:</strong> Comprehensive 2026 Corona Schools institutional information</p>
+      <p><strong>Deployment:</strong> Render Cloud Platform</p>
+      <p><strong>Repository:</strong> <a href="https://github.com/tomilolaxt-cyber/corona-bot-2" target="_blank">GitHub &#x2197;</a></p>
+    </div>
+  </div>
+</div>
 
-        function closeInstallPrompt() {
-            document.getElementById('installPrompt').style.display = 'none';
-        }
+<!-- Install Instructions Modal -->
+<div class="modal-overlay" id="installModal" onclick="handleModalClick(event,'installModal')">
+  <div class="modal-box wide">
+    <button class="modal-close" onclick="closeInstallModal()">&#x2715;</button>
+    <div class="modal-title">&#x1F4F1; Install Corona School Bot</div>
+    <div id="androidInstallSection" class="install-section">
+      <h3>&#x1F916; For Android (Chrome)</h3>
+      <ol>
+        <li>Tap the <strong>menu button</strong> (three dots) in Chrome</li>
+        <li>Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+        <li>Tap <strong>"Install"</strong></li>
+        <li>The app will appear on your home screen! &#x1F389;</li>
+      </ol>
+      <button class="install-now-btn" id="androidInstallBtn" onclick="installApp()">Install Now</button>
+    </div>
+    <div id="iosInstallSection" class="install-section">
+      <h3>&#x1F34E; For iPhone/iPad (Safari)</h3>
+      <ol>
+        <li>Tap the <strong>Share button</strong> &#x238B; at the bottom</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+        <li>Tap <strong>"Add"</strong> in the top right</li>
+        <li>The app will appear on your home screen! &#x1F389;</li>
+      </ol>
+      <div class="ios-note-box"><strong>Note:</strong> This feature only works in Safari browser on iOS devices.</div>
+    </div>
+    <div class="install-benefits-box">
+      <h3>&#x2728; Benefits of Installing:</h3>
+      <ul>
+        <li>&#x1F4F1; Quick access from your home screen</li>
+        <li>&#x1F680; Faster loading times</li>
+        <li>&#x1F4F4; Works offline</li>
+        <li>&#x1F5BC; Full-screen experience</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-        // iOS Install Instructions
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
+<!-- PWA Install Banner -->
+<div class="install-banner" id="installBanner">
+  <span class="banner-icon">&#x1F4F1;</span>
+  <div class="banner-text">
+    <strong>Install Corona School Bot</strong>
+    <p>Add to your home screen for quick access!</p>
+  </div>
+  <button class="banner-install-btn" onclick="installApp()">Install</button>
+  <button class="banner-close-btn" onclick="closeBanner()">&#x2715;</button>
+</div>
 
-        if (isIOS() && !window.navigator.standalone) {
-            setTimeout(() => {
-                const iosPrompt = document.getElementById('installPrompt');
-                iosPrompt.querySelector('.install-text p').textContent = 
-                    'Tap Share button, then "Add to Home Screen"';
-                iosPrompt.querySelector('.install-btn').style.display = 'none';
-                iosPrompt.style.display = 'block';
-            }, 3000);
-        }
-    </script>
-</body>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let deferredPrompt = null;
+let messageCount = 0;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  checkUser();
+  autoResizeTextarea();
+  registerServiceWorker();
+  setupPWAInstall();
+});
+
+// ============================================================
+// USER / AUTH
+// ============================================================
+async function checkUser() {
+  try {
+    const res = await fetch('/api/user');
+    const data = await res.json();
+    if (data.authenticated) {
+      currentUser = data;
+      showUserProfile(data);
+      loadChatHistory();
+      fetchGreeting();
+    }
+  } catch (e) {
+    console.error('User check failed:', e);
+  }
+}
+
+function showUserProfile(user) {
+  document.getElementById('sidebarSignIn').style.display = 'none';
+  const profile = document.getElementById('sidebarUserProfile');
+  profile.style.display = 'block';
+  document.getElementById('sidebarUserPic').src = user.picture || '';
+  document.getElementById('sidebarUserName').textContent = user.name || '';
+  document.getElementById('sidebarUserEmail').textContent = user.email || '';
+
+  const badge = document.getElementById('sidebarRoleBadge');
+  const roleMap = {
+    owner:        { label: '\u{1F451} Owner',        cls: 'role-owner' },
+    corona_staff: { label: '\u{1F3EB} Corona Staff', cls: 'role-staff' },
+    pending:      { label: '\u23F3 Pending',         cls: 'role-pending' },
+    user:         { label: '\u{1F464} User',          cls: 'role-user' }
+  };
+  const r = roleMap[user.role] || roleMap['user'];
+  badge.textContent = r.label;
+  badge.className = 'role-badge ' + r.cls;
+
+  if (user.role === 'owner') {
+    document.getElementById('adminLinkWrap').style.display = 'block';
+  }
+}
+
+async function fetchGreeting() {
+  try {
+    const res = await fetch('/api/greeting');
+    const data = await res.json();
+    if (data.greeting) {
+      document.getElementById('welcomeMsg').textContent = data.greeting;
+    }
+  } catch (e) {}
+}
+
+// ============================================================
+// CHAT HISTORY (SIDEBAR)
+// ============================================================
+async function loadChatHistory() {
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    if (!data.authenticated) return;
+
+    const history = data.history || [];
+    const userMsgs = history.filter(m => m.role === 'user');
+
+    const listEl = document.getElementById('historyList');
+    const emptyEl = document.getElementById('historyEmpty');
+    listEl.innerHTML = '';
+
+    if (userMsgs.length === 0) {
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    // Show last 10 user messages as history items
+    const recent = userMsgs.slice(-10).reverse();
+    recent.forEach((msg, i) => {
+      const item = document.createElement('div');
+      item.className = 'history-item' + (i === 0 ? ' active' : '');
+      item.innerHTML = '<span class="hi-icon">\u{1F4AC}</span>' +
+        truncate(msg.message, 32);
+      item.onclick = () => askQuestion(msg.message);
+      listEl.appendChild(item);
+    });
+  } catch (e) {
+    console.error('History load failed:', e);
+  }
+}
+
+function truncate(str, n) {
+  return str.length > n ? str.slice(0, n) + '...' : str;
+}
+
+// ============================================================
+// MESSAGING
+// ============================================================
+async function sendMessage(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  showChatArea();
+  addMessage(text, 'user');
+  showTyping();
+
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    hideTyping();
+    if (data.success) {
+      addMessage(data.response, 'bot');
+    } else {
+      addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('Sorry, I encountered a connection error. Please try again.', 'bot');
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('userInput').focus();
+    if (currentUser) loadChatHistory();
+  }
+}
+
+function showChatArea() {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('messagesContainer').style.display = 'flex';
+}
+
+function addMessage(text, role) {
+  const container = document.getElementById('messagesContainer');
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  if (role === 'bot') {
+    avatar.textContent = '\u{1F916}';
+  } else {
+    avatar.textContent = currentUser
+      ? (currentUser.name || 'U').charAt(0).toUpperCase()
+      : '\u{1F464}';
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = formatMessage(text);
+
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const inner = document.createElement('div');
+  inner.style.display = 'flex';
+  inner.style.flexDirection = 'column';
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+
+  row.appendChild(avatar);
+  row.appendChild(inner);
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+  messageCount++;
+}
+
+function formatMessage(text) {
+  // Convert **bold** to <strong>
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Convert bullet points
+  text = text.replace(/^\u2022 (.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  // Convert newlines to <br>
+  text = text.replace(/\n/g, '<br>');
+  return text;
+}
+
+let typingEl = null;
+function showTyping() {
+  const container = document.getElementById('messagesContainer');
+  typingEl = document.createElement('div');
+  typingEl.className = 'msg-row bot typing-indicator';
+  typingEl.innerHTML =
+    '<div class="msg-avatar">\u{1F916}</div>' +
+    '<div class="typing-dots">' +
+    '<div class="typing-dot"></div>' +
+    '<div class="typing-dot"></div>' +
+    '<div class="typing-dot"></div>' +
+    '</div>';
+  container.appendChild(typingEl);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+function askQuestion(question) {
+  document.getElementById('userInput').value = question;
+  sendMessage(null);
+}
+
+function newChat() {
+  if (messageCount > 0 && !confirm('Start a new chat? Current conversation will be cleared.')) return;
+  clearChat(true);
+}
+
+async function clearChat(silent) {
+  if (!silent && !confirm('Clear the chat?')) return;
+  try {
+    await fetch('/api/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  } catch (e) {}
+  document.getElementById('messagesContainer').innerHTML = '';
+  document.getElementById('messagesContainer').style.display = 'none';
+  document.getElementById('welcomeScreen').style.display = 'flex';
+  messageCount = 0;
+  if (currentUser) fetchGreeting();
+  closeSidebar();
+}
+
+// ============================================================
+// INPUT HANDLING
+// ============================================================
+function handleInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+  }
+}
+
+function autoResizeTextarea() {
+  const ta = document.getElementById('userInput');
+  if (!ta) return;
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function handleModalClick(e, id) {
+  if (e.target === document.getElementById(id)) {
+    document.getElementById(id).classList.remove('open');
+  }
+}
+
+// Login Modal
+function showLoginModal() {
+  document.getElementById('loginModal').classList.add('open');
+  document.getElementById('otpStep1').style.display = 'block';
+  document.getElementById('otpStep2').style.display = 'none';
+  document.getElementById('otpMessage').textContent = '';
+  document.getElementById('otpMessage').className = 'otp-msg';
+  setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').classList.remove('open');
+}
+
+function backToEmail() {
+  document.getElementById('otpStep1').style.display = 'block';
+  document.getElementById('otpStep2').style.display = 'none';
+  document.getElementById('otpMessage').textContent = '';
+}
+
+async function sendOTP() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const btn = document.querySelector('#otpStep1 .otp-submit-btn');
+  const msg = document.getElementById('otpMessage');
+
+  if (!email || !email.includes('@')) {
+    msg.textContent = '\u274C Please enter a valid email address';
+    msg.className = 'otp-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  msg.textContent = '';
+
+  try {
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('otpStep1').style.display = 'none';
+      document.getElementById('otpStep2').style.display = 'block';
+      document.getElementById('otpSentMsg').textContent = '\u2705 Code sent to ' + email + '! Check your inbox.';
+      setTimeout(() => document.getElementById('otpCode').focus(), 100);
+    } else {
+      msg.textContent = '\u274C ' + data.error;
+      msg.className = 'otp-msg error';
+    }
+  } catch (e) {
+    msg.textContent = '\u274C Connection error. Please try again.';
+    msg.className = 'otp-msg error';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Code \u{1F4E7}';
+}
+
+async function verifyOTP() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const code = document.getElementById('otpCode').value.trim();
+  const btn = document.querySelector('#otpStep2 .otp-submit-btn');
+  const msg = document.getElementById('otpMessage');
+
+  if (!code || code.length !== 6) {
+    msg.textContent = '\u274C Please enter the 6-digit code';
+    msg.className = 'otp-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+
+  try {
+    const res = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msg.textContent = '\u2705 ' + data.message + ' Logging you in...';
+      msg.className = 'otp-msg success';
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      msg.textContent = '\u274C ' + data.error;
+      msg.className = 'otp-msg error';
+      btn.disabled = false;
+      btn.textContent = 'Verify \u2705';
+    }
+  } catch (e) {
+    msg.textContent = '\u274C Connection error. Please try again.';
+    msg.className = 'otp-msg error';
+    btn.disabled = false;
+    btn.textContent = 'Verify \u2705';
+  }
+}
+
+// Creators Modal
+function showCreators() {
+  document.getElementById('creatorsModal').classList.add('open');
+}
+function closeCreators() {
+  document.getElementById('creatorsModal').classList.remove('open');
+}
+
+// Install Modal
+function showInstallInstructions() {
+  const modal = document.getElementById('installModal');
+  modal.classList.add('open');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const android = document.getElementById('androidInstallSection');
+  const ios = document.getElementById('iosInstallSection');
+  if (isIOS) { android.style.display = 'none'; ios.style.display = 'block'; }
+  else if (isAndroid) { android.style.display = 'block'; ios.style.display = 'none'; }
+  else { android.style.display = 'block'; ios.style.display = 'block'; }
+}
+function closeInstallModal() {
+  document.getElementById('installModal').classList.remove('open');
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeLoginModal(); closeCreators(); closeInstallModal();
+  }
+});
+
+// ============================================================
+// PWA
+// ============================================================
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/static/service-worker.js')
+        .then(r => console.log('SW registered:', r.scope))
+        .catch(e => console.log('SW failed:', e));
+    });
+  }
+}
+
+function setupPWAInstall() {
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 4000);
+  });
+
+  // iOS prompt
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && !window.navigator.standalone) {
+    setTimeout(() => {
+      const banner = document.getElementById('installBanner');
+      banner.querySelector('.banner-text p').textContent = 'Tap Share \u238B then "Add to Home Screen"';
+      banner.querySelector('.banner-install-btn').style.display = 'none';
+      banner.classList.add('show');
+    }, 4000);
+  }
+}
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r => {
+      deferredPrompt = null;
+      closeBanner();
+    });
+  }
+}
+
+function closeBanner() {
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+// Enter key for OTP inputs
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInput = document.getElementById('loginEmail');
+  const codeInput = document.getElementById('otpCode');
+  if (emailInput) emailInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendOTP(); });
+  if (codeInput) codeInput.addEventListener('keypress', e => { if (e.key === 'Enter') verifyOTP(); });
+});
+</script>
+
 </html>
