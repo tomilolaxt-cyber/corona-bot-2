@@ -3,9 +3,7 @@ from flask_cors import CORS
 import os
 import json
 import random
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from corona_data import CORONA_COMPREHENSIVE
@@ -26,21 +24,16 @@ GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
-# Email Configuration
-MAIL_EMAIL = os.getenv('MAIL_EMAIL', 'tomilolaxt@gmail.com')
-MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
+# Resend API Configuration
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+MAIL_FROM = 'Corona School Bot <onboarding@resend.dev>'
 
 # OTP storage: {email: {code, expires_at}}
 otp_store = {}
 
 def send_otp_email(to_email, otp_code, user_name=""):
-    """Send OTP code to user's email"""
+    """Send OTP code using Resend API"""
     try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'🔐 Your Corona School Bot Login Code: {otp_code}'
-        msg['From'] = MAIL_EMAIL
-        msg['To'] = to_email
-
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #dc143c, #8b0000); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
@@ -61,13 +54,26 @@ def send_otp_email(to_email, otp_code, user_name=""):
         </div>
         """
 
-        msg.attach(MIMEText(html, 'html'))
+        response = requests.post(
+            'https://api.resend.com/emails',
+            headers={
+                'Authorization': f'Bearer {RESEND_API_KEY}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'from': MAIL_FROM,
+                'to': [to_email],
+                'subject': f'🔐 Your Corona School Bot Login Code: {otp_code}',
+                'html': html
+            }
+        )
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as server:
-            server.login(MAIL_EMAIL, MAIL_PASSWORD)
-            server.sendmail(MAIL_EMAIL, to_email, msg.as_string())
+        if response.status_code == 200 or response.status_code == 201:
+            return True
+        else:
+            print(f"Resend error: {response.status_code} - {response.text}")
+            return False
 
-        return True
     except Exception as e:
         print(f"Email error: {e}")
         return False
