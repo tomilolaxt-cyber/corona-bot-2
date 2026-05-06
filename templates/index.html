@@ -37,10 +37,10 @@
                     
                     <!-- User Profile / Login -->
                     <div id="userSection">
-                        <button class="login-btn" onclick="window.location.href='/login'">
-                            <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; margin-right: 5px;">
+                        <a href="/login" class="login-btn">
+                            <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; margin-right: 5px; vertical-align: middle;">
                             Sign in with Google
-                        </button>
+                        </a>
                     </div>
                     
                     <div id="userProfile" style="display: none;">
@@ -57,7 +57,7 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="message bot-message">
                         <div class="message-content">
-                            <p>Hello! I'm Corona Bot, an AI assistant powered by advanced AI technology. I'm here to answer all your questions about Corona Schools - from admissions and curriculum to facilities and activities. What would you like to know?</p>
+                            <p id="welcomeMessage">Hello! Welcome to Corona School Bot. I have comprehensive information about all Corona Schools campuses. Sign in for a personalized experience! What would you like to know?</p>
                         </div>
                     </div>
                 </div>
@@ -209,6 +209,12 @@
                     document.getElementById('userProfile').style.display = 'flex';
                     document.getElementById('userName').textContent = data.name;
                     document.getElementById('userPicture').src = data.picture;
+                    // Set personalized greeting
+                    fetch('/api/greeting')
+                        .then(r => r.json())
+                        .then(g => {
+                            document.getElementById('welcomeMessage').textContent = g.greeting;
+                        });
                 }
             });
         
