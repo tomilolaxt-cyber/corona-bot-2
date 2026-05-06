@@ -25,7 +25,7 @@ GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Resend API Configuration
-RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
 MAIL_FROM = 'Corona School Bot <onboarding@resend.dev>'
 
 # OTP storage: {email: {code, expires_at}}
