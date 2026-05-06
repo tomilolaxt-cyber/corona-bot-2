@@ -1,13 +1,11 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_cors import CORS
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import os
 from dotenv import load_dotenv
 from corona_data import CORONA_COMPREHENSIVE
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport import requests as google_requests
-import json
 
 # Load environment variables
 load_dotenv('corona.env')
@@ -17,30 +15,10 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'corona-school-bot-secret-key-2026')
 CORS(app)
 
-# Flask-Login setup
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
 # Google OAuth Configuration
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # For development only
-
-# User class for Flask-Login
-class User(UserMixin):
-    def __init__(self, id, name, email, picture):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.picture = picture
-
-# In-memory user storage (in production, use a database)
-users = {}
-
-@login_manager.user_loader
-def load_user(user_id):
-    return users.get(user_id)
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 def generate_response(user_message):
     """Generate intelligent response based on comprehensive Corona Schools knowledge"""
@@ -321,11 +299,11 @@ What would you like to know?"""
 
 @app.route('/')
 def index():
-    return render_template('index.html', user=current_user if current_user.is_authenticated else None)
+    user = session.get('user')
+    return render_template('index.html', user=user)
 
 @app.route('/login')
 def login():
-    """Initiate Google OAuth login"""
     flow = Flow.from_client_config(
         {
             "web": {
@@ -339,18 +317,12 @@ def login():
         scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile']
     )
     flow.redirect_uri = url_for('callback', _external=True)
-    
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true'
-    )
-    
+    authorization_url, state = flow.authorization_url(access_type='offline')
     session['state'] = state
     return redirect(authorization_url)
 
 @app.route('/callback')
 def callback():
-    """Handle Google OAuth callback"""
     try:
         flow = Flow.from_client_config(
             {
@@ -366,52 +338,34 @@ def callback():
             state=session['state']
         )
         flow.redirect_uri = url_for('callback', _external=True)
-        
         flow.fetch_token(authorization_response=request.url)
-        
         credentials = flow.credentials
-        request_session = google_requests.Request()
-        
         id_info = id_token.verify_oauth2_token(
             credentials.id_token,
-            request_session,
+            google_requests.Request(),
             GOOGLE_CLIENT_ID
         )
-        
-        # Create user
-        user = User(
-            id=id_info['sub'],
-            name=id_info.get('name', ''),
-            email=id_info.get('email', ''),
-            picture=id_info.get('picture', '')
-        )
-        
-        users[user.id] = user
-        login_user(user)
-        
+        session['user'] = {
+            'id': id_info['sub'],
+            'name': id_info.get('name', ''),
+            'email': id_info.get('email', ''),
+            'picture': id_info.get('picture', '')
+        }
         return redirect(url_for('index'))
-    
     except Exception as e:
         print(f"Login error: {e}")
         return redirect(url_for('index'))
 
 @app.route('/logout')
-@login_required
 def logout():
-    """Logout user"""
-    logout_user()
+    session.pop('user', None)
     return redirect(url_for('index'))
 
 @app.route('/api/user')
 def get_user():
-    """Get current user info"""
-    if current_user.is_authenticated:
-        return jsonify({
-            'authenticated': True,
-            'name': current_user.name,
-            'email': current_user.email,
-            'picture': current_user.picture
-        })
+    user = session.get('user')
+    if user:
+        return jsonify({'authenticated': True, **user})
     return jsonify({'authenticated': False})
 
 @app.route('/api/chat', methods=['POST'])
