@@ -34,6 +34,20 @@
                 <div class="header-buttons">
                     <button class="creators-btn" onclick="showCreators()">👥 About the Creators</button>
                     <button class="install-app-btn" id="installAppBtn" onclick="showInstallInstructions()">📱 Install App</button>
+                    
+                    <!-- User Profile / Login -->
+                    <div id="userSection">
+                        <button class="login-btn" onclick="window.location.href='/login'">
+                            <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; margin-right: 5px;">
+                            Sign in with Google
+                        </button>
+                    </div>
+                    
+                    <div id="userProfile" style="display: none;">
+                        <img id="userPicture" class="user-avatar" alt="User">
+                        <span id="userName" class="user-name"></span>
+                        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -186,6 +200,18 @@
     
     <!-- PWA Service Worker Registration -->
     <script>
+        // Check if user is logged in
+        fetch('/api/user')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    document.getElementById('userSection').style.display = 'none';
+                    document.getElementById('userProfile').style.display = 'flex';
+                    document.getElementById('userName').textContent = data.name;
+                    document.getElementById('userPicture').src = data.picture;
+                }
+            });
+        
         // Register service worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

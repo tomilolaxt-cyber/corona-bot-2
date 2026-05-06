@@ -1,0 +1,21 @@
+# Secret files - NEVER push these to GitHub
+.env
+*.env
+corona.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
