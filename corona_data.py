@@ -35,7 +35,7 @@ CORONA_COMPREHENSIVE = {
         },
         "ikoyi_primary": {
             "name": "Corona School Ikoyi (IKS)",
-            "head": "Mrs. Funlola Olorunishola",
+            "head": "Mrs. Ifeoluwatomi Adeniyi",
             "location": "6 Mekunwen Road, Ikoyi",
             "established": 1960,
             "students": "~575 pupils",
