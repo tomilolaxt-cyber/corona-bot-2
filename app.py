@@ -127,11 +127,11 @@ def get_user_history(user_id, limit=100):
     try:
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        c.execute('SELECT role, message, time FROM chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
+        c.execute('SELECT role, message, time FROM chat_history WHERE user_id = ? ORDER BY id ASC LIMIT ?',
                   (user_id, limit))
         rows = c.fetchall()
         conn.close()
-        return [{'role': r[0], 'message': r[1], 'time': r[2]} for r in reversed(rows)]
+        return [{'role': r[0], 'message': r[1], 'time': r[2]} for r in rows]
     except Exception as e:
         print(f"DB read error: {e}")
         return []

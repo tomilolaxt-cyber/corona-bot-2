@@ -751,12 +751,16 @@ async function loadChatHistory() {
     // Restore previous messages into chat area
     if (history.length > 0 && messageCount === 0) {
       showChatArea();
+      // Sort by order - history comes back in correct order from DB
       history.forEach(msg => {
-        addMessage(msg.message, msg.role, true); // true = no animation (restore mode)
+        addMessage(msg.message, msg.role, true);
       });
-      // Scroll to bottom
-      const chatArea = document.getElementById('chatArea');
-      chatArea.scrollTop = chatArea.scrollHeight;
+      // Scroll to bottom after all messages loaded
+      setTimeout(() => {
+        const chatArea = document.getElementById('chatArea');
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, 100);
+      messageCount = history.length;
     }
 
   } catch (e) {
