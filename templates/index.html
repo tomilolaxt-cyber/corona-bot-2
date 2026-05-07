@@ -718,7 +718,7 @@ async function fetchGreeting() {
 }
 
 // ============================================================
-// CHAT HISTORY (SIDEBAR)
+// CHAT HISTORY (SIDEBAR + RESTORE MESSAGES)
 // ============================================================
 async function loadChatHistory() {
   try {
@@ -729,26 +729,36 @@ async function loadChatHistory() {
     const history = data.history || [];
     const userMsgs = history.filter(m => m.role === 'user');
 
+    // Update sidebar list
     const listEl = document.getElementById('historyList');
     const emptyEl = document.getElementById('historyEmpty');
     listEl.innerHTML = '';
 
     if (userMsgs.length === 0) {
       emptyEl.style.display = 'block';
-      return;
+    } else {
+      emptyEl.style.display = 'none';
+      const recent = userMsgs.slice(-10).reverse();
+      recent.forEach((msg, i) => {
+        const item = document.createElement('div');
+        item.className = 'history-item' + (i === 0 ? ' active' : '');
+        item.innerHTML = '<span class="hi-icon">\u{1F4AC}</span>' + truncate(msg.message, 32);
+        item.onclick = () => askQuestion(msg.message);
+        listEl.appendChild(item);
+      });
     }
-    emptyEl.style.display = 'none';
 
-    // Show last 10 user messages as history items
-    const recent = userMsgs.slice(-10).reverse();
-    recent.forEach((msg, i) => {
-      const item = document.createElement('div');
-      item.className = 'history-item' + (i === 0 ? ' active' : '');
-      item.innerHTML = '<span class="hi-icon">\u{1F4AC}</span>' +
-        truncate(msg.message, 32);
-      item.onclick = () => askQuestion(msg.message);
-      listEl.appendChild(item);
-    });
+    // Restore previous messages into chat area
+    if (history.length > 0 && messageCount === 0) {
+      showChatArea();
+      history.forEach(msg => {
+        addMessage(msg.message, msg.role, true); // true = no animation (restore mode)
+      });
+      // Scroll to bottom
+      const chatArea = document.getElementById('chatArea');
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
   } catch (e) {
     console.error('History load failed:', e);
   }
@@ -804,10 +814,11 @@ function showChatArea() {
   document.getElementById('messagesContainer').style.display = 'flex';
 }
 
-function addMessage(text, role) {
+function addMessage(text, role, restore = false) {
   const container = document.getElementById('messagesContainer');
   const row = document.createElement('div');
   row.className = 'msg-row ' + role;
+  if (restore) row.style.animation = 'none'; // No animation when restoring
 
   const avatar = document.createElement('div');
   avatar.className = 'msg-avatar';
@@ -837,7 +848,7 @@ function addMessage(text, role) {
   row.appendChild(inner);
   container.appendChild(row);
   container.scrollTop = container.scrollHeight;
-  messageCount++;
+  if (!restore) messageCount++;
 }
 
 function formatMessage(text) {

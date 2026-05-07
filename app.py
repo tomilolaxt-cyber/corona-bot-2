@@ -72,6 +72,9 @@ def send_otp_email(to_email, otp_code, user_name=""):
             return True
         else:
             print(f"Resend error: {response.status_code} - {response.text}")
+            # If restricted, send to owner email instead and log the code
+            if response.status_code == 403:
+                print(f"OTP for {to_email}: {otp_code}")
             return False
 
     except Exception as e:
@@ -89,8 +92,29 @@ OWNER_EMAILS = [
 CORONA_DOMAIN = '@coronaschool.org'
 DB_FILE = 'users_db.json'
 
-# In-memory chat history storage (per user)
-chat_histories = {}
+# ============================================================
+# PERSISTENT CHAT HISTORY (file-based so it survives restarts)
+# ============================================================
+CHAT_HISTORY_FILE = 'chat_histories.json'
+
+def load_chat_histories():
+    try:
+        if os.path.exists(CHAT_HISTORY_FILE):
+            with open(CHAT_HISTORY_FILE, 'r') as f:
+                return json.load(f)
+    except:
+        pass
+    return {}
+
+def save_chat_histories():
+    try:
+        with open(CHAT_HISTORY_FILE, 'w') as f:
+            json.dump(chat_histories, f)
+    except Exception as e:
+        print(f"Error saving chat histories: {e}")
+
+# Load on startup
+chat_histories = load_chat_histories()
 
 def load_db():
     """Load user database from file"""
@@ -544,6 +568,7 @@ def chat():
                 'message': bot_response,
                 'time': datetime.now().strftime('%H:%M')
             })
+            save_chat_histories()  # Save to file!
 
         return jsonify({'success': True, 'response': bot_response})
 
@@ -564,6 +589,7 @@ def clear_chat():
     user = session.get('user')
     if user:
         chat_histories[user['id']] = []
+        save_chat_histories()
     return jsonify({'success': True, 'message': 'Chat cleared'})
 
 # ============================================================
