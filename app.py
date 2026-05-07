@@ -3,7 +3,79 @@ from flask_cors import CORS
 import os
 import json
 import random
-import sqlite3
+import google.generativeai as genai
+
+# Gemini AI Configuration
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
+gemini_model = None
+
+def init_gemini():
+    global gemini_model
+    if GEMINI_API_KEY:
+        try:
+            genai.configure(api_key=GEMINI_API_KEY)
+            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+            print("✅ Gemini AI initialized!")
+        except Exception as e:
+            print(f"Gemini init error: {e}")
+
+init_gemini()
+
+# Build Corona Schools context for Gemini
+CORONA_CONTEXT = f"""You are Corona School Bot, an AI assistant for Corona Schools Trust Council in Nigeria.
+You have deep knowledge about Corona Schools and you are helpful, friendly and professional.
+
+Here is the comprehensive Corona Schools information you must use:
+
+HISTORY: Founded {CORONA_COMPREHENSIVE['history']['founded']}, incorporated {CORONA_COMPREHENSIVE['history']['incorporated']}.
+Founding Chairman: {CORONA_COMPREHENSIVE['history']['founding_chairman']}
+Total Alumni: {CORONA_COMPREHENSIVE['history']['total_alumni']}, Staff: {CORONA_COMPREHENSIVE['history']['staff_count']}
+
+LEADERSHIP 2026:
+- Chairman: {CORONA_COMPREHENSIVE['governance']['chairman']}
+- CEO: {CORONA_COMPREHENSIVE['governance']['ceo']}
+- Director of Education: {CORONA_COMPREHENSIVE['governance']['director_of_education']}
+- Finance Controller: {CORONA_COMPREHENSIVE['governance']['finance_controller']}
+
+SCHOOLS:
+- Ikoyi Day Nursery: Head {CORONA_COMPREHENSIVE['schools']['ikoyi_day_nursery']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['ikoyi_day_nursery']['location']}
+- Ikoyi Primary: Head {CORONA_COMPREHENSIVE['schools']['ikoyi_primary']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['ikoyi_primary']['location']}, Houses: {', '.join(CORONA_COMPREHENSIVE['schools']['ikoyi_primary']['houses'])}
+- Victoria Island: Head {CORONA_COMPREHENSIVE['schools']['victoria_island']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['victoria_island']['location']}
+- Gbagada: Head {CORONA_COMPREHENSIVE['schools']['gbagada']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['gbagada']['location']}
+- Lekki Primary: Head {CORONA_COMPREHENSIVE['schools']['lekki_primary']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['lekki_primary']['location']}
+- Agbara Secondary: Head {CORONA_COMPREHENSIVE['schools']['agbara_secondary']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['agbara_secondary']['location']}, Type: {CORONA_COMPREHENSIVE['schools']['agbara_secondary']['type']}
+- Lekki Secondary: Head {CORONA_COMPREHENSIVE['schools']['lekki_secondary']['head']}, Location: {CORONA_COMPREHENSIVE['schools']['lekki_secondary']['location']}
+
+FEES 2024/2025:
+- Creche/Playschool: {CORONA_COMPREHENSIVE['fees_2024_2025']['creche_playschool']['annual']} per year
+- Nursery: {CORONA_COMPREHENSIVE['fees_2024_2025']['nursery']['annual']} per year
+- Primary: {CORONA_COMPREHENSIVE['fees_2024_2025']['primary']['annual']} per year
+- Secondary Day: {CORONA_COMPREHENSIVE['fees_2024_2025']['secondary_day']['annual']} per year
+- Secondary Boarding: {CORONA_COMPREHENSIVE['fees_2024_2025']['secondary_boarding']['annual']} per year
+
+ACADEMIC CALENDAR 2025/2026:
+- First Term: {CORONA_COMPREHENSIVE['academic_calendar_2025_2026']['first_term']['period']}
+- Second Term: {CORONA_COMPREHENSIVE['academic_calendar_2025_2026']['second_term']['period']}
+- Third Term: {CORONA_COMPREHENSIVE['academic_calendar_2025_2026']['third_term']['period']}
+
+ACCREDITATIONS: {', '.join(CORONA_COMPREHENSIVE['accreditations'])}
+
+MISSION: {CORONA_COMPREHENSIVE['mission']}
+VISION: {CORONA_COMPREHENSIVE['vision']}
+CORE VALUES: {', '.join(CORONA_COMPREHENSIVE['core_values'])}
+
+ACTIVITIES: {', '.join(CORONA_COMPREHENSIVE['co_curricular']['sports'] + CORONA_COMPREHENSIVE['co_curricular']['academic_clubs'])}
+
+CSR: {CORONA_COMPREHENSIVE['csr']['out_of_school_initiative']}
+Scholarships: {CORONA_COMPREHENSIVE['csr']['scholarships']}
+
+WEBSITE: coronaschoolbot.org
+BUILT BY: Tomilola Aboderin with Kiro AI
+
+Always respond in a helpful, professional and friendly manner. Keep responses concise but informative.
+If asked about something not related to Corona Schools, politely redirect to Corona Schools topics.
+Format responses clearly with bullet points where appropriate.
+"""
 import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -200,7 +272,35 @@ def get_greeting(user):
         return f"Welcome back, {name}! 😊 Great to see you again. What would you like to know about Corona Schools?"
 
 def generate_response(user_message, user=None):
-    """Generate intelligent response based on comprehensive Corona Schools knowledge"""
+    """Generate intelligent response using Gemini AI with Corona Schools knowledge"""
+    role = user.get('role', 'guest') if user else 'guest'
+    name = user.get('name', '').split()[0] if user else ''
+
+    # Try Gemini AI first
+    if gemini_model:
+        try:
+            # Add user context to prompt
+            user_context = ""
+            if user:
+                if role == 'owner':
+                    user_context = f"\nNote: You are talking to {name}, the OWNER and creator of this bot. Give them special respect and treat them as a VIP."
+                elif role == 'corona_staff':
+                    user_context = f"\nNote: You are talking to {name}, a verified Corona Schools staff member."
+                else:
+                    user_context = f"\nNote: You are talking to {name}, a registered user."
+
+            prompt = f"{CORONA_CONTEXT}{user_context}\n\nUser question: {user_message}"
+            response = gemini_model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            print(f"Gemini error: {e}")
+            # Fall back to local knowledge base
+            return generate_local_response(user_message, user)
+    else:
+        return generate_local_response(user_message, user)
+
+
+def generate_local_response(user_message, user=None):
     message = user_message.lower().strip()
     data = CORONA_COMPREHENSIVE
     role = user.get('role', 'guest') if user else 'guest'
