@@ -3,6 +3,14 @@ from flask_cors import CORS
 import os
 import json
 import random
+import sqlite3
+import requests
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from corona_data import CORONA_COMPREHENSIVE
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+from google.auth.transport import requests as google_requests
 import google.generativeai as genai
 
 # Gemini AI Configuration
@@ -76,13 +84,6 @@ Always respond in a helpful, professional and friendly manner. Keep responses co
 If asked about something not related to Corona Schools, politely redirect to Corona Schools topics.
 Format responses clearly with bullet points where appropriate.
 """
-import requests
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-from corona_data import CORONA_COMPREHENSIVE
-from google.oauth2 import id_token
-from google_auth_oauthlib.flow import Flow
-from google.auth.transport import requests as google_requests
 
 # Load environment variables
 load_dotenv('corona.env')
