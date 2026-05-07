@@ -13,6 +13,23 @@ from google_auth_oauthlib.flow import Flow
 from google.auth.transport import requests as google_requests
 import google.generativeai as genai
 
+# Load environment variables FIRST before anything else
+load_dotenv('corona.env')
+load_dotenv('.env')
+
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'corona-school-bot-secret-key-2026')
+CORS(app)
+
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+# Resend API Configuration
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
+MAIL_FROM = 'Corona School Bot <onboarding@resend.dev>'
+
 # Gemini AI Configuration
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
 gemini_model = None
@@ -26,6 +43,8 @@ def init_gemini():
             print("✅ Gemini AI initialized!")
         except Exception as e:
             print(f"Gemini init error: {e}")
+    else:
+        print("⚠️ No Gemini API key found!")
 
 init_gemini()
 
@@ -84,23 +103,6 @@ Always respond in a helpful, professional and friendly manner. Keep responses co
 If asked about something not related to Corona Schools, politely redirect to Corona Schools topics.
 Format responses clearly with bullet points where appropriate.
 """
-
-# Load environment variables
-load_dotenv('corona.env')
-load_dotenv('.env')
-
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'corona-school-bot-secret-key-2026')
-CORS(app)
-
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-# Resend API Configuration
-RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
-MAIL_FROM = 'Corona School Bot <onboarding@resend.dev>'
 
 # OTP storage: {email: {code, expires_at}}
 otp_store = {}
