@@ -729,23 +729,41 @@ async function loadChatHistory() {
     const history = data.history || [];
     const userMsgs = history.filter(m => m.role === 'user');
 
-    // Update sidebar list
+    // Update sidebar - show conversations grouped by session, not individual messages
     const listEl = document.getElementById('historyList');
     const emptyEl = document.getElementById('historyEmpty');
     listEl.innerHTML = '';
 
-    if (userMsgs.length === 0) {
+    if (history.length === 0) {
       emptyEl.style.display = 'block';
     } else {
       emptyEl.style.display = 'none';
-      const recent = userMsgs.slice(-10).reverse();
-      recent.forEach((msg, i) => {
-        const item = document.createElement('div');
-        item.className = 'history-item' + (i === 0 ? ' active' : '');
-        item.innerHTML = '<span class="hi-icon">\u{1F4AC}</span>' + truncate(msg.message, 32);
-        item.onclick = () => askQuestion(msg.message);
-        listEl.appendChild(item);
+
+      // Group into sessions by date
+      const sessions = {};
+      history.forEach(msg => {
+        const date = msg.time || 'Today';
+        if (!sessions[date]) sessions[date] = [];
+        sessions[date].push(msg);
       });
+
+      // Show one item per day - use first user message as title
+      const dates = Object.keys(sessions);
+      const todayLabel = 'Today';
+
+      // Just show one "Current Conversation" item
+      const firstUserMsg = history.find(m => m.role === 'user');
+      if (firstUserMsg) {
+        const item = document.createElement('div');
+        item.className = 'history-item active';
+        item.innerHTML = '<span class="hi-icon">&#x1F4AC;</span>' + truncate(firstUserMsg.message, 32);
+        item.onclick = () => {
+          // Already loaded - just scroll to top
+          const chatArea = document.getElementById('chatArea');
+          chatArea.scrollTop = 0;
+        };
+        listEl.appendChild(item);
+      }
     }
 
     // Restore previous messages into chat area
@@ -809,7 +827,6 @@ async function sendMessage(e) {
   } finally {
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('userInput').focus();
-    if (currentUser) loadChatHistory();
   }
 }
 
