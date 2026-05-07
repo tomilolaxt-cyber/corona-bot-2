@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 import json
 import random
+import sqlite3
 import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -93,28 +94,59 @@ CORONA_DOMAIN = '@coronaschool.org'
 DB_FILE = 'users_db.json'
 
 # ============================================================
-# PERSISTENT CHAT HISTORY (file-based so it survives restarts)
+# SQLITE DATABASE FOR PERSISTENT CHAT HISTORY
 # ============================================================
-CHAT_HISTORY_FILE = 'chat_histories.json'
+DB_PATH = 'corona_bot.db'
 
-def load_chat_histories():
-    try:
-        if os.path.exists(CHAT_HISTORY_FILE):
-            with open(CHAT_HISTORY_FILE, 'r') as f:
-                return json.load(f)
-    except:
-        pass
-    return {}
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS chat_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        message TEXT NOT NULL,
+        time TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    conn.commit()
+    conn.close()
 
-def save_chat_histories():
+def save_message(user_id, role, message, time):
     try:
-        with open(CHAT_HISTORY_FILE, 'w') as f:
-            json.dump(chat_histories, f)
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('INSERT INTO chat_history (user_id, role, message, time) VALUES (?, ?, ?, ?)',
+                  (user_id, role, message, time))
+        conn.commit()
+        conn.close()
     except Exception as e:
-        print(f"Error saving chat histories: {e}")
+        print(f"DB save error: {e}")
 
-# Load on startup
-chat_histories = load_chat_histories()
+def get_user_history(user_id, limit=100):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('SELECT role, message, time FROM chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
+                  (user_id, limit))
+        rows = c.fetchall()
+        conn.close()
+        return [{'role': r[0], 'message': r[1], 'time': r[2]} for r in reversed(rows)]
+    except Exception as e:
+        print(f"DB read error: {e}")
+        return []
+
+def clear_user_history(user_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('DELETE FROM chat_history WHERE user_id = ?', (user_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"DB clear error: {e}")
+
+init_db()
 
 def load_db():
     """Load user database from file"""
@@ -516,9 +548,6 @@ def callback():
             'picture': id_info.get('picture', ''),
             'role': role
         }
-        if user_id not in chat_histories:
-            chat_histories[user_id] = []
-
         return redirect(url_for('index'))
     except Exception as e:
         print(f"Login error: {e}")
@@ -556,19 +585,9 @@ def chat():
         # Save to chat history if logged in
         if user:
             user_id = user['id']
-            if user_id not in chat_histories:
-                chat_histories[user_id] = []
-            chat_histories[user_id].append({
-                'role': 'user',
-                'message': user_message,
-                'time': datetime.now().strftime('%H:%M')
-            })
-            chat_histories[user_id].append({
-                'role': 'bot',
-                'message': bot_response,
-                'time': datetime.now().strftime('%H:%M')
-            })
-            save_chat_histories()  # Save to file!
+            now = datetime.now().strftime('%H:%M')
+            save_message(user_id, 'user', user_message, now)
+            save_message(user_id, 'bot', bot_response, now)
 
         return jsonify({'success': True, 'response': bot_response})
 
@@ -580,16 +599,14 @@ def get_history():
     user = session.get('user')
     if not user:
         return jsonify({'authenticated': False})
-    user_id = user['id']
-    history = chat_histories.get(user_id, [])
-    return jsonify({'authenticated': True, 'history': history[-50:]})  # Last 50 messages
+    history = get_user_history(user['id'])
+    return jsonify({'authenticated': True, 'history': history})
 
 @app.route('/api/clear', methods=['POST'])
 def clear_chat():
     user = session.get('user')
     if user:
-        chat_histories[user['id']] = []
-        save_chat_histories()
+        clear_user_history(user['id'])
     return jsonify({'success': True, 'message': 'Chat cleared'})
 
 # ============================================================
@@ -659,9 +676,6 @@ def verify_otp():
         'picture': f'https://ui-avatars.com/api/?name={name}&background=dc143c&color=fff',
         'role': role
     }
-
-    if user_id not in chat_histories:
-        chat_histories[user_id] = []
 
     return jsonify({
         'success': True,
