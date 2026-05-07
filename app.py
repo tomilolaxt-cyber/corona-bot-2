@@ -28,7 +28,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Resend API Configuration
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
-MAIL_FROM = 'Corona School Bot <onboarding@resend.dev>'
+MAIL_FROM = 'Corona School Bot <noreply@coronaschoolbot.org>'
 
 # Gemini AI Configuration
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
