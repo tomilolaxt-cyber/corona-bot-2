@@ -11,11 +11,10 @@ from corona_data import CORONA_COMPREHENSIVE
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport import requests as google_requests
-import google.generativeai as genai
 from groq import Groq
 from openai import OpenAI
 
-# Load environment variables FIRST before anything else
+# Load environment variables FIRST
 load_dotenv('corona.env')
 load_dotenv('.env')
 
@@ -33,20 +32,17 @@ RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
 MAIL_FROM = 'Corona School Bot <noreply@coronaschoolbot.org>'
 
 # ============================================================
-# AI CONFIGURATION - Groq + Grok + Gemini fallback
+# AI CONFIGURATION - Groq (primary) + Grok (fallback)
 # ============================================================
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '').strip()
 GROK_API_KEY = os.getenv('GROK_API_KEY', '').strip()
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
 
 groq_client = None
 grok_client = None
-gemini_model = None
 
 def init_ai():
-    global groq_client, grok_client, gemini_model
+    global groq_client, grok_client
 
-    # Init Groq (fastest)
     if GROQ_API_KEY:
         try:
             groq_client = Groq(api_key=GROQ_API_KEY)
@@ -54,7 +50,6 @@ def init_ai():
         except Exception as e:
             print(f"Groq init error: {e}")
 
-    # Init Grok (xAI)
     if GROK_API_KEY:
         try:
             grok_client = OpenAI(
@@ -65,17 +60,8 @@ def init_ai():
         except Exception as e:
             print(f"Grok init error: {e}")
 
-    # Init Gemini (backup)
-    if GEMINI_API_KEY:
-        try:
-            genai.configure(api_key=GEMINI_API_KEY)
-            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-            print("✅ Gemini AI initialized!")
-        except Exception as e:
-            print(f"Gemini init error: {e}")
-
-    if not any([groq_client, grok_client, gemini_model]):
-        print("⚠️ No AI models initialized - using local knowledge base")
+    if not any([groq_client, grok_client]):
+        print("⚠️ No AI models - using local knowledge base")
 
 init_ai()
 
@@ -306,7 +292,7 @@ def get_greeting(user):
         return f"Welcome back, {name}! 😊 Great to see you again. What would you like to know about Corona Schools?"
 
 def generate_response(user_message, user=None):
-    """Generate intelligent response using Groq → Grok → Gemini → Local fallback"""
+    """Generate intelligent response using Groq → Grok → Local fallback"""
     role = user.get('role', 'guest') if user else 'guest'
     name = user.get('name', '').split()[0] if user else ''
 
@@ -319,15 +305,15 @@ def generate_response(user_message, user=None):
         elif name:
             user_context = f"\nNote: You are talking to {name}, a registered user."
 
-    prompt = f"{CORONA_CONTEXT}{user_context}\n\nUser: {user_message}\nAssistant:"
+    system_prompt = CORONA_CONTEXT + user_context
 
-    # Try Groq first (fastest)
+    # Try Groq first (fastest - Llama 3)
     if groq_client:
         try:
             response = groq_client.chat.completions.create(
                 model="llama3-8b-8192",
                 messages=[
-                    {"role": "system", "content": CORONA_CONTEXT + user_context},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message}
                 ],
                 max_tokens=1024,
@@ -337,13 +323,13 @@ def generate_response(user_message, user=None):
         except Exception as e:
             print(f"Groq error: {e}")
 
-    # Try Grok second
+    # Try Grok second (xAI)
     if grok_client:
         try:
             response = grok_client.chat.completions.create(
                 model="grok-beta",
                 messages=[
-                    {"role": "system", "content": CORONA_CONTEXT + user_context},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message}
                 ],
                 max_tokens=1024,
@@ -352,14 +338,6 @@ def generate_response(user_message, user=None):
             return response.choices[0].message.content
         except Exception as e:
             print(f"Grok error: {e}")
-
-    # Try Gemini third
-    if gemini_model:
-        try:
-            response = gemini_model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            print(f"Gemini error: {e}")
 
     # Fall back to local knowledge base
     return generate_local_response(user_message, user)

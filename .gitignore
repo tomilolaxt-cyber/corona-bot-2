@@ -3,6 +3,9 @@
 *.env
 corona.env
 
+# Vision AI (separate project)
+Vision/
+
 # Python
 __pycache__/
 *.pyc
